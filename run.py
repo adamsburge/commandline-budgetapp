@@ -21,6 +21,7 @@ def home_prompt():
     ask user which action they would like to perform
     """    
     print("Welcome to Commandline BudgetApp\n")
+    total_budgeted = get_total_budgeted_amount()
     print(f"Your current budgeted amount is £{total_budgeted} \n")
     print("Current Budget\n")
     get_current_budget()
@@ -42,7 +43,7 @@ def home_prompt():
             break
     
     if int(action) == 1:
-        print("You picked 1!")
+        add_paycheck()
     elif int(action) == 2:
         print("You picked 2!")
     elif int(action) == 3:
@@ -57,7 +58,7 @@ def get_total_budgeted_amount():
     Calculates the total budgeted amount from the budget
     """
     budgeted_amount = main.col_values(2)
-    column_list = [int(x) for x in budgeted_amount]
+    column_list = [float(x) for x in budgeted_amount]
 
     return sum(column_list)
 
@@ -77,6 +78,18 @@ def get_current_budget():
         category_num += 1
 
 
+def add_paycheck():
+    """
+    Receive Paycheck information, validate entries and, if valid, allow the user
+    to delegate money to various categories. Then return to the home prompt.
+    """
+    while True:
+        paycheck = input("How much is your paycheck?\n")
+        if validate_number_entry(paycheck):
+            break
+
+
+
 def validate_home_data(value):
     """
     Validates the user input from the home page. 
@@ -89,6 +102,14 @@ def validate_home_data(value):
         return False
     return True
 
-total_budgeted = get_total_budgeted_amount()
+def validate_number_entry(value):
+    try:
+        if float(value) < 1:
+            raise ValueError(f"You must enter a number greater than 1. You entered {value}")
+    except ValueError as e:
+        print(f"Invalid entry: {e}, please type a number.")
+        return False
+    return True
+    
 
 home_prompt()
