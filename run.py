@@ -19,7 +19,7 @@ def home_prompt():
     """
     Print the current budget details and 
     ask user which action they would like to perform
-    """
+    """    
     print("Welcome to Commandline BudgetApp\n")
     print(f"Your current budgeted amount is £{total_budgeted} \n")
     print("Current Budget\n")
@@ -35,7 +35,13 @@ def home_prompt():
     5. I'm done budgeting
     """
     )
-    input("Type the number of the action you would like to perform:\n")
+    while True:
+        action = input("Type the number of the action you would like to perform:\n")
+        if validate_home_data(action):
+            print("One second while we get things ready")
+            break
+    
+    return int(action)
 
 def get_total_budgeted_amount():
     """
@@ -59,6 +65,18 @@ def get_current_budget():
     for k, v in budget_list.items():
         print(str(k) + ": £" + str(v))
 
+
+def validate_home_data(value):
+    """
+    Validates the user input from the home page. 
+    """
+    try:
+        if int(value) > 5:
+            raise ValueError(f"You must enter a number between 1 and 5. You entered {value}")
+    except ValueError as e:
+        print(f"Invalid entry: {e}, please try again.")
+        return False
+    return True
 
 total_budgeted = get_total_budgeted_amount()
 
