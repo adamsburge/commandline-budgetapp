@@ -148,15 +148,49 @@ def add_transaction():
             break
     transaction_amount = float(transaction)
     
+    print(" ")
     transaction_institution = input("Who did you pay?\n")
 
     while True:
+        print(" ")
         transaction_date = input("When did you make this payment? (DD-MM-YY) \n")
         if validate_date_entry(transaction_date):
             break
 
-    new_transaction_list = [transaction_amount, transaction_institution, transaction_date]
+    new_transaction_list = [-transaction_amount, transaction_institution, transaction_date]
     append_transaction_row(new_transaction_list)
+
+    print(" ")
+    print(f"Great! From which category should this £{transaction_amount} payment to {transaction_institution} be deducted?\n")
+    get_current_budget()
+    print(" ")
+
+    while True:
+        transaction_selected_category = input("Type the number of the category this transaction falls under:\n")
+        if validate_category_num_entry(transaction_selected_category):
+            break
+    
+    transaction_category_name = main.row_values(int(transaction_selected_category))[0]
+    print(f"Deducting £{transaction_amount} {transaction_institution} payment from {transaction_category_name}...")
+    initial_category_amount = main.row_values(int(transaction_selected_category))[1]
+    new_category_amount = float(initial_category_amount) - transaction_amount
+    main.update_cell(int(transaction_selected_category), 2, new_category_amount)
+    
+    print(
+"""
+Would you like to add another transaction?
+1. Yes
+2. No
+"""
+        )
+    while True:
+        end_of_transaction_decision = input("Type 1 or 2\n")
+        if validate_y_n_entry(end_of_transaction_decision):
+            break
+    if end_of_transaction_decision == '1':
+        add_transaction()
+    else:
+        home_prompt()
 
 
 def validate_home_data(value):
@@ -226,6 +260,19 @@ def validate_date_entry(value):
         print("")
         print(f"{value} is not formated properly.\n")
         return False
+
+
+def validate_y_n_entry(value):
+    """
+    Validates any inputs which require yes or no answers
+    """
+    try:
+        if int(value) > 2:
+            raise ValueError(f"You must enter either 1 (yes) or 2 (no). You entered {value}")
+    except ValueError as e:
+        print(f"Invalid entry: {e}, please type a number.")
+        return False
+    return True
 
 
 def append_transaction_row(value):
