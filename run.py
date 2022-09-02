@@ -24,6 +24,18 @@ def home_prompt():
     print(f"Your current budgeted amount is £{total_budgeted} \n")
     print("Current Budget\n")
     get_current_budget()
+    print("")
+    print("What would you like to do?")
+    print(
+    """
+    1. Add a Paycheck
+    2. Add a Transaction
+    3. Adjust Categories
+    4. View Recent Transactions
+    5. I'm done budgeting
+    """
+    )
+    input("Type the number of the action you would like to perform:\n")
 
 def get_total_budgeted_amount():
     """
