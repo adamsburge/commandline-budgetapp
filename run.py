@@ -1,5 +1,6 @@
 import gspread
 from google.oauth2.service_account import Credentials
+from datetime import datetime
 
 SCOPE = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -90,6 +91,15 @@ def add_paycheck():
 
     left_to_delegate = float(paycheck)
 
+    while True:
+        date = input("When did you receive your paycheck? (DD-MM-YY) \n")
+        if validate_date_entry(date):
+            break
+
+
+    paycheck_transaction = [float(paycheck), "My Employer", date]
+    transactions.append_row(paycheck_transaction)
+
     print("Time to delegate the money from this paycheck!\n")
     
     while left_to_delegate != 0:
@@ -116,8 +126,8 @@ def add_paycheck():
         initial_category_amount = main.row_values(int(selected_category))[1]
         new_category_amount = float(initial_category_amount) + float(amount_to_delegate)
         main.update_cell(int(selected_category), 2, new_category_amount)
+        
         left_to_delegate -= float(amount_to_delegate)
-
 
         print(f"You now have £{left_to_delegate} from your paycheck.\n")
     
@@ -179,6 +189,20 @@ def validate_delegation_max(value, max):
         print(f"Invalid entry: {e}, please type a number.")
         return False
     return True
+
+
+def validate_date_entry(value):
+    """
+    Validate that entries requesting dates are formated correctly
+    """
+    try:
+        if value != datetime.strptime(value, "%d-%m-%y").strftime('%d-%m-%y'):
+            raise ValueError
+        return True
+    except ValueError:
+        print("")
+        print(f"{value} is not formated properly.\n")
+        return False
 
 
 home_prompt()
