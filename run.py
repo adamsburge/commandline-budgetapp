@@ -88,6 +88,42 @@ def add_paycheck():
         if validate_number_entry(paycheck):
             break
 
+    left_to_delegate = float(paycheck)
+
+    print("Time to delegate the money from this paycheck!\n")
+    
+    while left_to_delegate != 0:
+        print("To make sure you don't have any unbudgeted money, you must delegate all the paycheck.\n")
+        print(f"Here is how your current budget stands:")
+        get_current_budget()
+        print(" ")
+
+        while True:
+            selected_category = input("Type the number of the category you wish to delegate money to:\n")
+            if validate_category_num_entry(selected_category):
+                break
+        
+        print(f"Great! You have £{left_to_delegate} left to delegate from your paycheck.\n")
+        category_name = main.row_values(int(selected_category))[0]
+        while True:
+            amount_to_delegate = input(f"How much would you like to put towards {category_name}?\n")
+            if validate_number_entry(amount_to_delegate):
+                if validate_delegation_max(amount_to_delegate, left_to_delegate):
+                    break
+        
+        print(f"Perfect. Adding £{amount_to_delegate} to {category_name}\n")
+        
+        initial_category_amount = main.row_values(int(selected_category))[1]
+        new_category_amount = float(initial_category_amount) + float(amount_to_delegate)
+        main.update_cell(int(selected_category), 2, new_category_amount)
+        left_to_delegate -= float(amount_to_delegate)
+
+
+        print(f"You now have £{left_to_delegate} from your paycheck.\n")
+    
+    print("You have delegated all your paycheck! Well done! Taking you back to the main menu.")
+
+    home_prompt()
 
 
 def validate_home_data(value):
@@ -110,6 +146,26 @@ def validate_number_entry(value):
         print(f"Invalid entry: {e}, please type a number.")
         return False
     return True
+
+
+def validate_category_num_entry(value):
+    entry_amount = len(main.col_values(1))
+    try:
+        if int(value) > int(entry_amount):
+            raise ValueError(f"You must enter a number between 1 and {entry_amount}. You entered {value}")
+    except ValueError as e:
+        print(f"Invalid entry: {e}, please type a number.")
+        return False
+    return True
     
+def validate_delegation_max(value, max):
+    try:
+        if float(value) > float(max):
+            raise ValueError(f"You must enter a number between 1 and {max}. You entered {value}")
+    except ValueError as e:
+        print(f"Invalid entry: {e}, please type a number.")
+        return False
+    return True
+
 
 home_prompt()
