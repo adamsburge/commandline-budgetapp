@@ -47,7 +47,7 @@ def home_prompt():
     if int(action) == 1:
         add_paycheck()
     elif int(action) == 2:
-        print("You picked 2!")
+        add_transaction()
     elif int(action) == 3:
         print("You picked 3!")
     elif int(action) == 4:
@@ -105,7 +105,7 @@ def add_paycheck():
     
     while left_to_delegate != 0:
         print("To make sure you don't have any unbudgeted money, you must delegate all the paycheck.\n")
-        print(f"Here is how your current budget stands:")
+        print("Here is how your current budget stands:")
         get_current_budget()
         print(" ")
 
@@ -135,6 +135,28 @@ def add_paycheck():
     print("You have delegated all your paycheck! Well done! Taking you back to the main menu.")
 
     home_prompt()
+
+
+def add_transaction():
+    """
+    Receives new transaction information, deducts money from appropriate
+    budget categories, adds transaction to transaction list.
+    """
+    while True:
+        transaction = input("How much is the transaction?\n")
+        if validate_number_entry(transaction):
+            break
+    transaction_amount = float(transaction)
+    
+    transaction_institution = input("Who did you pay?\n")
+
+    while True:
+        transaction_date = input("When did you make this payment? (DD-MM-YY) \n")
+        if validate_date_entry(transaction_date):
+            break
+
+    new_transaction_list = [transaction_amount, transaction_institution, transaction_date]
+    append_transaction_row(new_transaction_list)
 
 
 def validate_home_data(value):
