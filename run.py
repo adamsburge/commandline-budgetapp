@@ -12,9 +12,8 @@ SCOPED_CREDS = CREDS.with_scopes(SCOPE)
 GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
 SHEET = GSPREAD_CLIENT.open('commandline-budgetapp')
 
-sales = SHEET.worksheet('main')
-
-data = sales.get_all_values()
+main = SHEET.worksheet('main')
+transactions = SHEET.worksheet('transactions')
 
 def home_prompt():
     """
@@ -22,5 +21,18 @@ def home_prompt():
     ask user which action they would like to perform
     """
     print("Welcome to Commandline BudgetApp\n")
-    print(f"Your current budgeted amount is £\n")
+    print(f"Your current budgeted amount is £{total_budgeted} \n")
     print("Current Budget\n")
+
+def get_total_budgeted_amount():
+    """
+    Calculates the total budgeted amount from the budget
+    """
+    budgeted_amount = main.col_values(2)
+    column_list = [int(x) for x in budgeted_amount]
+
+    return sum(column_list)
+
+total_budgeted = get_total_budgeted_amount()
+
+home_prompt()
