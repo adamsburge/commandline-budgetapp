@@ -96,9 +96,8 @@ def add_paycheck():
         if validate_date_entry(date):
             break
 
-
     paycheck_transaction = [float(paycheck), "My Employer", date]
-    transactions.append_row(paycheck_transaction)
+    append_transaction_row(paycheck_transaction)
 
     print("Time to delegate the money from this paycheck!\n")
     
@@ -204,5 +203,10 @@ def validate_date_entry(value):
         print(f"{value} is not formated properly.\n")
         return False
 
+def append_transaction_row(value):
+    """
+    Append a row to the transaction list
+    """
+    transactions.append_row(value)
 
 home_prompt()
