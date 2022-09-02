@@ -138,7 +138,11 @@ def validate_home_data(value):
         return False
     return True
 
+
 def validate_number_entry(value):
+    """
+    Validate entries that need a number
+    """
     try:
         if float(value) < 1:
             raise ValueError(f"You must enter a number greater than 1. You entered {value}")
@@ -149,6 +153,9 @@ def validate_number_entry(value):
 
 
 def validate_category_num_entry(value):
+    """
+    Used to validate whether an input entry exceeds the number of budget categories.
+    """
     entry_amount = len(main.col_values(1))
     try:
         if int(value) > int(entry_amount):
@@ -157,8 +164,14 @@ def validate_category_num_entry(value):
         print(f"Invalid entry: {e}, please type a number.")
         return False
     return True
-    
+
+
 def validate_delegation_max(value, max):
+    """
+    Validates whether a one number is greater than another.
+    Used in the paycheck function make sure delegation entries
+    are not larger than the paycheck.
+    """
     try:
         if float(value) > float(max):
             raise ValueError(f"You must enter a number between 1 and {max}. You entered {value}")
