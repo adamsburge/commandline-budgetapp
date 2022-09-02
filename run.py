@@ -16,4 +16,13 @@ sales = SHEET.worksheet('main')
 
 data = sales.get_all_values()
 
-print(data)
+def home_prompt():
+    """
+    Print the current budget details and 
+    ask user which action they would like to perform
+    """
+    print("Welcome to Commandline BudgetApp\n")
+    print(f"Your current budgeted amount is £\n")
+    print("Current Budget\n")
+
+home_prompt()
