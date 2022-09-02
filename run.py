@@ -38,10 +38,19 @@ def home_prompt():
     while True:
         action = input("Type the number of the action you would like to perform:\n")
         if validate_home_data(action):
-            print("One second while we get things ready")
+            print("One second while we get things ready\n")
             break
     
-    return int(action)
+    if int(action) == 1:
+        print("You picked 1!")
+    elif int(action) == 2:
+        print("You picked 2!")
+    elif int(action) == 3:
+        print("You picked 3!")
+    elif int(action) == 4:
+        print("You picked 4!")
+    else:
+        print("You picked 5!")
 
 def get_total_budgeted_amount():
     """
@@ -74,12 +83,10 @@ def validate_home_data(value):
         if int(value) > 5:
             raise ValueError(f"You must enter a number between 1 and 5. You entered {value}")
     except ValueError as e:
-        print(f"Invalid entry: {e}, please try again.")
+        print(f"Invalid entry: {e}, please type a number.")
         return False
     return True
 
 total_budgeted = get_total_budgeted_amount()
 
-
 home_prompt()
-
