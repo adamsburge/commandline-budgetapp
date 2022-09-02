@@ -24,5 +24,3 @@ def home_prompt():
     print("Welcome to Commandline BudgetApp\n")
     print(f"Your current budgeted amount is £\n")
     print("Current Budget\n")
-
-home_prompt()
