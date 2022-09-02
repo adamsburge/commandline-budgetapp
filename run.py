@@ -23,6 +23,7 @@ def home_prompt():
     print("Welcome to Commandline BudgetApp\n")
     print(f"Your current budgeted amount is £{total_budgeted} \n")
     print("Current Budget\n")
+    get_current_budget()
 
 def get_total_budgeted_amount():
     """
@@ -33,6 +34,22 @@ def get_total_budgeted_amount():
 
     return sum(column_list)
 
+
+def get_current_budget():
+    """
+    Gets the values of the categories and their budgeted amounts,
+    then prints these values in a comprehensible way for the user.
+    """
+    categories = main.col_values(1)
+    amount = main.col_values(2)
+
+    budget_list = {category: amount for category, amount in zip(categories, amount)}
+    for k, v in budget_list.items():
+        print(str(k) + ": £" + str(v))
+
+
 total_budgeted = get_total_budgeted_amount()
 
+
 home_prompt()
+
