@@ -16,6 +16,7 @@ SHEET = GSPREAD_CLIENT.open('commandline-budgetapp')
 main = SHEET.worksheet('main')
 transactions = SHEET.worksheet('transactions')
 
+
 def home_prompt():
     """
     Print the current budget details and 
@@ -53,6 +54,7 @@ def home_prompt():
         print("You picked 4!")
     else:
         print("You picked 5!")
+
 
 def get_total_budgeted_amount():
     """
@@ -203,10 +205,12 @@ def validate_date_entry(value):
         print(f"{value} is not formated properly.\n")
         return False
 
+
 def append_transaction_row(value):
     """
     Append a row to the transaction list
     """
     transactions.append_row(value)
+
 
 home_prompt()
