@@ -71,8 +71,10 @@ def get_current_budget():
     amount = main.col_values(2)
 
     budget_list = {category: amount for category, amount in zip(categories, amount)}
-    for k, v in budget_list.items():
-        print(str(k) + ": £" + str(v))
+    category_num = 1
+    for k, v in budget_list.items():        
+        print(str(category_num) + ". " + str(k) + ": £" + str(v))
+        category_num += 1
 
 
 def validate_home_data(value):
