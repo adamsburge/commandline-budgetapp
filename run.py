@@ -203,7 +203,16 @@ def view_recent_transactions():
         if validate_transaction_list_num_entry(transaction_amount_request, amount_of_transactions):
             break
     transactions_list = transactions.get_all_values()
-    print(transactions_list)
+    amounts = transactions.col_values(1)
+    institutions = transactions.col_values(2)
+    date = transactions.col_values(3)
+    category = transactions.col_values(4)
+
+    print(f"Your {transaction_amount_request} most recent transactions are:\n")
+    print(f"   Amount — Institution — Date — Category\n")
+    for i in range(int(transaction_amount_request)):
+        counter = i + 1
+        print(str(counter) + ". £ " + amounts[-counter] + " — " + institutions[-counter] + " — " + date[-counter] + " — " + category[-counter])
 
 
 def validate_home_data(value):
