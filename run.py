@@ -157,9 +157,6 @@ def add_transaction():
         if validate_date_entry(transaction_date):
             break
 
-    new_transaction_list = [-transaction_amount, transaction_institution, transaction_date]
-    append_transaction_row(new_transaction_list)
-
     print(" ")
     print(f"Great! From which category should this £{transaction_amount} payment to {transaction_institution} be deducted?\n")
     get_current_budget()
@@ -176,6 +173,9 @@ def add_transaction():
     new_category_amount = float(initial_category_amount) - transaction_amount
     main.update_cell(int(transaction_selected_category), 2, new_category_amount)
     
+    new_transaction_list = [-transaction_amount, transaction_institution, transaction_date, transaction_category_name]
+    append_transaction_row(new_transaction_list)
+
     print(
 """
 Would you like to add another transaction?
@@ -202,7 +202,8 @@ def view_recent_transactions():
         transaction_amount_request = input(f"You have {amount_of_transactions} transactions listed. How many of the most recent would you like to see?\n")
         if validate_transaction_list_num_entry(transaction_amount_request, amount_of_transactions):
             break
-    print("You've made it past the while loop!")
+    transactions_list = transactions.get_all_values()
+    print(transactions_list)
 
 
 def validate_home_data(value):
