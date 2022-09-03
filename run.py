@@ -51,9 +51,9 @@ def home_prompt():
     elif int(action) == 3:
         print("You picked 3!")
     elif int(action) == 4:
-        print("You picked 4!")
+        view_recent_transactions()
     else:
-        print("You picked 5!")
+        print("Thanks for budgeting! Exiting the Application...")
 
 
 def get_total_budgeted_amount():
@@ -193,6 +193,18 @@ Would you like to add another transaction?
         home_prompt()
 
 
+def view_recent_transactions():
+    """
+    Lets the user request to see a specified amount of recent transactions
+    """
+    amount_of_transactions = len(transactions.col_values(1)) - 1
+    while True:
+        transaction_amount_request = input(f"You have {amount_of_transactions} transactions listed. How many of the most recent would you like to see?\n")
+        if validate_transaction_list_num_entry(transaction_amount_request, amount_of_transactions):
+            break
+    print("You've made it past the while loop!")
+
+
 def validate_home_data(value):
     """
     Validates the user input from the home page. 
@@ -269,6 +281,19 @@ def validate_y_n_entry(value):
     try:
         if int(value) > 2:
             raise ValueError(f"You must enter either 1 (yes) or 2 (no). You entered {value}")
+    except ValueError as e:
+        print(f"Invalid entry: {e}, please type a number.")
+        return False
+    return True
+
+
+def validate_transaction_list_num_entry(value, max):
+    """
+    Used to validate whether an input entry exceeds the number of transaction list items.
+    """
+    try:
+        if int(value) > int(max):
+            raise ValueError(f"You must enter a number between 1 and {max}. You entered {value}\n")
     except ValueError as e:
         print(f"Invalid entry: {e}, please type a number.")
         return False
