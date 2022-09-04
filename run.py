@@ -1,7 +1,5 @@
 import gspread
 import os
-import time
-import sys
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 from colorama import init
