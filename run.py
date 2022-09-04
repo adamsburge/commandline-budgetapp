@@ -97,7 +97,7 @@ def add_paycheck():
     left_to_delegate = float(paycheck)
 
     while True:
-        date = input("When did you receive your paycheck? (DD-MM-YY) \n")
+        date = input("When did you receive your paycheck? (DD-MM-YY)\n")
         if validate_date_entry(date):
             break
     print_section_border()
@@ -158,7 +158,7 @@ def add_transaction():
 
     while True:
         print(" ")
-        transaction_date = input("When did you make this payment? (DD-MM-YY) \n")
+        transaction_date = input("When did you make this payment? (DD-MM-YY)\n")
         if validate_date_entry(transaction_date):
             break
 
