@@ -16,7 +16,6 @@
             rows: 40
         });
         term.open(document.getElementById('terminal'));
-        term.writeln('Running startup command: python3 run.py');
         term.writeln('');
 
         var ws = new WebSocket(location.protocol.replace('http', 'ws') + '//' + location.hostname + (location.port ? (
