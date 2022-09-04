@@ -1,6 +1,13 @@
 import gspread
+import os
+import time
+import sys
 from google.oauth2.service_account import Credentials
 from datetime import datetime
+from colorama import init
+from colorama import Fore
+init()
+init(autoreset=True)
 
 SCOPE = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -24,11 +31,11 @@ def home_prompt():
     """    
     print_section_border()
     total_budgeted = get_total_budgeted_amount()
-    print(f"Your current budgeted amount is £{total_budgeted} \n")
+    print(f"Your current budgeted amount is {Fore.GREEN} £{total_budgeted} \n")
     print("Current Budget\n")
     get_current_budget()
     print("")
-    print("What would you like to do?")
+    print(f"{Fore.YELLOW} What would you like to do?")
     print(
     """
     1. Add a Paycheck
@@ -39,11 +46,11 @@ def home_prompt():
     """
     )
     while True:
-        action = input("Type the number of the action you would like to perform:\n")
+        action = input(f"{Fore.YELLOW}Type the number of the action you would like to perform:\n")
         if validate_home_data(action):
             print(" ")
             print("One second while we get things ready...")
-            print_section_border()
+            clear_terminal()
             break
     
     if int(action) == 1:
@@ -478,6 +485,27 @@ def print_section_border():
     print("----------------------------------")
     print(" ")
 
-print_section_border()
+
+def clear_terminal():
+    '''
+    Call this function to clear
+    the terminal of the last section.
+    It resets colorama colors also.
+    '''
+    print(Style.RESET_ALL)
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
+def txt_effect(text_to_print):
+    '''
+    This prints all of the text slowly.
+    '''
+    for character in text_to_print:
+        sys.stdout.write(character)
+        sys.stdout.flush()
+        time.sleep(0.020)
+
+
+print("----------------------------------")
 print("Welcome to Commandline BudgetApp")
 home_prompt()
