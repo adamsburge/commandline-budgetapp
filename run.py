@@ -1,5 +1,7 @@
 import gspread
 import os
+import time
+import sys
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 from colorama import init
@@ -27,6 +29,8 @@ def home_prompt():
     Print the current budget details and 
     ask user which action they would like to perform
     """    
+    print_section_border()
+    print(f"{Style.BRIGHT}Commandline BudgetApp Dashboard")
     print_section_border()
     total_budgeted = get_total_budgeted_amount()
     print(f"Your current budgeted amount is {Fore.GREEN} £{total_budgeted} \n")
@@ -251,8 +255,13 @@ def view_recent_transactions():
     Lets the user request to see a specified amount of recent transactions
     """
     amount_of_transactions = len(transactions.col_values(1)) - 1
+
+    print_section_border()
+    print(f"You have {amount_of_transactions} transactions in your transaction list.")
+    print_section_border()
+
     while True:
-        transaction_amount_request = input(f"You have {amount_of_transactions} transactions listed. How many of the most recent would you like to see?\n")
+        transaction_amount_request = input(f"{Fore.YELLOW}How many of the most recent would you like to see?\n")
         if validate_transaction_list_num_entry(transaction_amount_request, amount_of_transactions):
             break
     amounts = transactions.col_values(1)
@@ -261,12 +270,13 @@ def view_recent_transactions():
     category = transactions.col_values(4)
 
     print_section_border()
-    print(f"Your {transaction_amount_request} most recent transactions are:\n")
+    print(f"{Fore.BLUE}Your {transaction_amount_request} most recent transactions are:\n")
     print("   Amount — Institution — Date — Category\n")
     for i in range(int(transaction_amount_request)):
         counter = i + 1
         print(str(counter) + ". £ " + amounts[-counter] + " — " + institutions[-counter] + " — " + date[-counter] + " — " + category[-counter])
 
+    print_section_border()
     print(
 """
 Would you like to view more transactions?
@@ -275,13 +285,14 @@ Would you like to view more transactions?
 """
         )
     while True:
-        end_of_view_transaction_decision = input("Type 1 or 2\n")
+        end_of_view_transaction_decision = input(f"{Fore.YELLOW}Type 1 or 2\n")
         if validate_y_n_entry(end_of_view_transaction_decision):
             break
     if end_of_view_transaction_decision == '1':
-        print_section_border()
+        clear_terminal()
         view_recent_transactions()
     else:
+        clear_terminal()
         home_prompt()
 
 
@@ -365,7 +376,7 @@ def delete_category():
         new_delegation_category_amount = amount_to_delegate + original_delegation_category_amount
         main.update_cell(delegation_category, 2, new_delegation_category_amount)
         category_to_delete_amount -= amount_to_delegate
-        clear_terminal()
+        print_section_border()
     clear_terminal()
     print(f"{Style.BRIGHT}You've delegated all the money from the {category_to_delete_name} category.")
     print_section_border()
@@ -511,6 +522,21 @@ def clear_terminal():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
-print("----------------------------------\n")
-print("Welcome to Commandline BudgetApp")
+def txt_effect(text_to_print):
+    '''
+    This prints all of the text slowly.
+    # '''
+    for character in text_to_print:
+        sys.stdout.write(character)
+        sys.stdout.flush()
+        time.sleep(0.025)
+
+
+txt_effect("----------------------------------\n")
+print(" ")
+txt_effect("Welcome to Commandline BudgetApp\n")
+print(" ")
+txt_effect("----------------------------------\n")
+time.sleep(3.5)
+clear_terminal()
 home_prompt()
