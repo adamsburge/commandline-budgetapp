@@ -1,10 +1,10 @@
 <body>
     <button onclick="window.location.reload()">Start Commandline BudgetApp</button>
-    <div id="terminal" style="text-align: center"></div>
+    <div id="terminal"></div>
 
     <script>
         var term = new Terminal({
-            cols: 150,
+            cols: 100,
             rows: 50
         });
         term.open(document.getElementById('terminal'));
