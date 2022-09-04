@@ -267,6 +267,21 @@ def add_category():
     new_category_list = [new_category_name, new_category_amount]
     main.append_row(new_category_list)
 
+    print(
+"""
+Would you like to adjust another category?
+1. Yes
+2. No
+"""
+        )
+    while True:
+        end_of_add_category_decision = input("Type 1 or 2\n")
+        if validate_y_n_entry(end_of_add_category_decision):
+            break
+    if end_of_add_category_decision == '1':
+        adjust_categories()
+    else:
+        home_prompt()    
 
 def validate_home_data(value):
     """
