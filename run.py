@@ -29,7 +29,7 @@ def home_prompt():
     Print the current budget details and 
     ask user which action they would like to perform
     """    
-    print_section_border()
+    print("----------------------------------")
     print(f"{Style.BRIGHT}Commandline BudgetApp Dashboard")
     print_section_border()
     total_budgeted = get_total_budgeted_amount()
@@ -104,7 +104,7 @@ def add_paycheck():
     Receive Paycheck information, validate entries and, if valid, allow the user
     to delegate money to various categories. Then return to the home prompt.
     """
-    print_section_border()
+    print("----------------------------------")
     print(f"{Style.BRIGHT}Just a few questions about your paycheck:")
     print_section_border()
 
@@ -159,7 +159,7 @@ def add_paycheck():
         left_to_delegate -= float(amount_to_delegate)
 
     clear_terminal()
-    print_section_border()
+    print("----------------------------------\n")
     print("You have delegated all your paycheck! Well done! Taking you back to the main menu.")
 
     home_prompt()
@@ -376,7 +376,7 @@ def delete_category():
         new_delegation_category_amount = amount_to_delegate + original_delegation_category_amount
         main.update_cell(delegation_category, 2, new_delegation_category_amount)
         category_to_delete_amount -= amount_to_delegate
-        print_section_border()
+        print("----------------------------------\n")
     clear_terminal()
     print(f"{Style.BRIGHT}You've delegated all the money from the {category_to_delete_name} category.")
     print_section_border()
