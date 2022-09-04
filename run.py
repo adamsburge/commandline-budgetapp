@@ -211,7 +211,7 @@ Would you like to add or delete a category?
     if adjust_decision == '1':
         add_category()
     else:
-        print("This will delete a category")
+        delete_category()
 
 
 def view_recent_transactions():
@@ -282,6 +282,35 @@ Would you like to adjust another category?
         adjust_categories()
     else:
         home_prompt()    
+
+
+def delete_category():
+    """
+    Allows the user to select the category to delete from the category list.
+    Then prompts the user to redelegate the money from that category.
+    """
+    print("Not a problem. Here is a list of your current categories:\n")
+    get_current_budget()
+    while True:
+        delete_selected_category = input("Type the number of the category you wish to delete:\n")
+        if validate_category_num_entry(delete_selected_category):
+            break
+    category_to_delete = int(delete_selected_category)
+
+    category_to_delete_name = main.row_values(category_to_delete)[0]
+    category_to_delete_amount = float(main.row_values(category_to_delete)[1])
+
+    print(" ")
+    print(f"Deleting {category_to_delete_name} category...\n")
+    main.delete_rows(category_to_delete)
+
+    print(f"The {category_to_delete_name} category had £{category_to_delete_amount} delegated to it.\n")
+    print("You will need to delegate this amount to another category.\n")
+    print("Where do you wish to delegate it?/n")
+    get_current_budget()
+
+    
+
 
 def validate_home_data(value):
     """
