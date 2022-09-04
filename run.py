@@ -235,14 +235,14 @@ def adjust_categories():
 """
         )
     while True:
-        adjust_decision = input("Type 1 or 2\n")
+        adjust_decision = input(f"{Fore.YELLOW}Type 1 or 2\n")
         if validate_y_n_entry(adjust_decision):
             break
     if adjust_decision == '1':
-        print_section_border()
+        clear_terminal()
         add_category()
     else:
-        print_section_border()
+        clear_terminal()
         delete_category()
 
 
@@ -290,16 +290,11 @@ def add_category():
     Adds a category to the the category list. Allows the user to
     select the name and the starting amount
     """
-    new_category_name = input("What is the name of the new category?\n")
-    while True:
-        new_amount = input("How much money should this category start with?\n")
-        if validate_number_entry(new_amount):
-            break
-    new_category_amount = float(new_amount)
+    new_category_name = input(f"{Fore.YELLOW}What is the name of the new category?\n")
 
     print(" ")
-    print(f"Adding a {new_category_name} category to your category list with a starting amount of £{new_amount}...")
-    new_category_list = [new_category_name, new_category_amount]
+    print(f"Adding a {new_category_name} category to your category list and setting starting amount to £0...")
+    new_category_list = [new_category_name, 0]
     main.append_row(new_category_list)
     print_section_border()
     print(
@@ -309,13 +304,14 @@ def add_category():
 """
         )
     while True:
-        end_of_add_category_decision = input("Type 1 or 2\n")
+        end_of_add_category_decision = input(f"{Fore.YELLOW}Type 1 or 2{Fore.RESET}\n")
         if validate_y_n_entry(end_of_add_category_decision):
             break
     if end_of_add_category_decision == '1':
-        print_section_border()
+        clear_terminal()
         adjust_categories()
     else:
+        clear_terminal()
         home_prompt()    
 
 
@@ -324,11 +320,11 @@ def delete_category():
     Allows the user to select the category to delete from the category list.
     Then prompts the user to redelegate the money from that category.
     """
-    print("Not a problem. Here is a list of your current categories:\n")
+    print(f"{Fore.RESET}Not a problem. Here is a list of your current categories:\n")
     get_current_budget()
     print(" ")
     while True:
-        delete_selected_category = input("Type the number of the category you wish to delete:\n")
+        delete_selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to delete:\n")
         if validate_category_num_entry(delete_selected_category):
             break
     category_to_delete = int(delete_selected_category)
@@ -341,15 +337,15 @@ def delete_category():
     main.delete_rows(category_to_delete)
     print_section_border()
 
-    print(f"The {category_to_delete_name} category had £{category_to_delete_amount} delegated to it.\n")
+    print(f"{Fore.BLUE}The {category_to_delete_name} category had {Fore.GREEN}£{category_to_delete_amount}{Fore.BLUE} delegated to it.\n")
     print("You will need to delegate this amount to another category.\n")
     
     while category_to_delete_amount != 0:
-        print(f"There is £{category_to_delete_amount} left to delegate from {category_to_delete_name}. Where do you wish to delegate it?\n")
+        print(f"There is {Fore.GREEN}£{category_to_delete_amount}{Fore.RESET} left to delegate from {category_to_delete_name}. Where do you wish to delegate it?\n")
         while True:
             get_current_budget()
             print(" ")
-            delegation_category_input = input("Type the number of the category you wish to delegate money to:\n")
+            delegation_category_input = input(f"{Fore.YELLOW}Type the number of the category you wish to delegate money to:\n")
             if validate_category_num_entry(delegation_category_input):
                 break
         
@@ -359,18 +355,20 @@ def delete_category():
 
         while True:
             print(" ")
-            print(f"{delegation_category_name} has £{original_delegation_category_amount}.\n")
-            amount_to_delegate_input = input(f"How much of the remaining £{category_to_delete_amount} do you wish to put towards {delegation_category_name}?\n")
+            print(f"{delegation_category_name} has {Fore.GREEN}£{original_delegation_category_amount}{Fore.RESET}.\n")
+            amount_to_delegate_input = input(f"{Fore.YELLOW}How much of the remaining {Fore.GREEN}£{category_to_delete_amount}{Fore.YELLOW} do you wish to put towards {delegation_category_name}?\n")
             if validate_delegation_max(amount_to_delegate_input, category_to_delete_amount):
                 break
         amount_to_delegate = float(amount_to_delegate_input)
         print(" ")
-        print(f"Adding £{amount_to_delegate} to {delegation_category_name}...")
+        print(f"Adding {Fore.GREEN}£{amount_to_delegate}{Fore.RESET} to {delegation_category_name}...")
         new_delegation_category_amount = amount_to_delegate + original_delegation_category_amount
         main.update_cell(delegation_category, 2, new_delegation_category_amount)
         category_to_delete_amount -= amount_to_delegate
-        print_section_border()
-    print(f"You've delegated all the money from the {category_to_delete_name} category.\n")
+        clear_terminal()
+    clear_terminal()
+    print(f"{Style.BRIGHT}You've delegated all the money from the {category_to_delete_name} category.")
+    print_section_border()
 
     print(
 """
@@ -380,13 +378,14 @@ Would you like to adjust another category?
 """
         )
     while True:
-        end_of_add_category_decision = input("Type 1 or 2\n")
+        end_of_add_category_decision = input(f"{Fore.YELLOW}Type 1 or 2\n")
         if validate_y_n_entry(end_of_add_category_decision):
             break
     if end_of_add_category_decision == '1':
-        print_section_border()
+        clear_terminal()
         adjust_categories()
     else:
+        clear_terminal()
         home_prompt()  
 
 
