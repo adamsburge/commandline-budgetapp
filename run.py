@@ -330,7 +330,23 @@ def delete_category():
         new_delegation_category_amount = amount_to_delegate + original_delegation_category_amount
         main.update_cell(delegation_category, 2, new_delegation_category_amount)
         category_to_delete_amount -= amount_to_delegate
-    print(f"You've delegated all the money from the {category_to_delete_name} category.")
+    print(f"You've delegated all the money from the {category_to_delete_name} category.\n")
+
+    print(
+"""
+Would you like to adjust another category?
+1. Yes
+2. No
+"""
+        )
+    while True:
+        end_of_add_category_decision = input("Type 1 or 2\n")
+        if validate_y_n_entry(end_of_add_category_decision):
+            break
+    if end_of_add_category_decision == '1':
+        adjust_categories()
+    else:
+        home_prompt()  
 
 
 def validate_home_data(value):
