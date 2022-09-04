@@ -86,8 +86,14 @@ def get_current_budget():
 
     budget_list = {category: amount for category, amount in zip(categories, amount)}
     category_num = 1
-    for k, v in budget_list.items():        
-        print(str(category_num) + ". " + str(k) + ": £" + str(v))
+    space = " "
+    dash = "-"
+    for k, v in budget_list.items(): 
+        num_1_spacing_amount = 3 - len(str(category_num))
+        num_2_spacing_amount = 28 - len(str(k))
+        spacing_1_amount = space*num_1_spacing_amount 
+        spacing_2_amount = dash*num_2_spacing_amount      
+        print(str(category_num) + "." + spacing_1_amount + str(k) + ":" + spacing_2_amount + "£ " + str(v))
         category_num += 1
 
 
@@ -495,16 +501,6 @@ def clear_terminal():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
-def txt_effect(text_to_print):
-    '''
-    This prints all of the text slowly.
-    '''
-    for character in text_to_print:
-        sys.stdout.write(character)
-        sys.stdout.flush()
-        time.sleep(0.020)
-
-
-print("----------------------------------")
+print("----------------------------------\n")
 print("Welcome to Commandline BudgetApp")
 home_prompt()
