@@ -22,7 +22,6 @@ def home_prompt():
     Print the current budget details and 
     ask user which action they would like to perform
     """    
-    print("Welcome to Commandline BudgetApp\n")
     total_budgeted = get_total_budgeted_amount()
     print(f"Your current budgeted amount is £{total_budgeted} \n")
     print("Current Budget\n")
@@ -176,14 +175,14 @@ def add_transaction():
     new_transaction_list = [-transaction_amount, transaction_institution, transaction_date, transaction_category_name]
     append_transaction_row(new_transaction_list)
 
-    print(
+    while True:
+        print(
 """
 Would you like to add another transaction?
 1. Yes
 2. No
 """
         )
-    while True:
         end_of_transaction_decision = input("Type 1 or 2\n")
         if validate_y_n_entry(end_of_transaction_decision):
             break
@@ -308,7 +307,7 @@ def delete_category():
     print("You will need to delegate this amount to another category.\n")
     
     while category_to_delete_amount != 0:
-        print(f"There is £{category_to_delete_amount} left to delegate. Where do you wish to delegate it?\n")
+        print(f"There is £{category_to_delete_amount} left to delegate from {category_to_delete_name}. Where do you wish to delegate it?\n")
         while True:
             get_current_budget()
             delegation_category_input = input("Type the number of the category you wish to delegate money to:\n")
@@ -330,6 +329,7 @@ def delete_category():
         new_delegation_category_amount = amount_to_delegate + original_delegation_category_amount
         main.update_cell(delegation_category, 2, new_delegation_category_amount)
         category_to_delete_amount -= amount_to_delegate
+    print(" ")
     print(f"You've delegated all the money from the {category_to_delete_name} category.\n")
 
     print(
@@ -424,7 +424,7 @@ def validate_y_n_entry(value):
     """
     try:
         if int(value) > 2:
-            raise ValueError(f"You must enter either 1 (yes) or 2 (no). You entered {value}")
+            raise ValueError(f"You must enter either 1 or 2. You entered {value}")
     except ValueError as e:
         print(f"Invalid entry: {e}, please type a number.")
         return False
@@ -451,4 +451,15 @@ def append_transaction_row(value):
     transactions.append_row(value)
 
 
+def print_section_border():
+    """
+    prints a set of dashes to create a border.
+    This print statement tidies up the terminal and
+    makes it more readable for the user
+    """
+    print(" ")
+    print("----------------------------------")
+    print(" ")
+
+print("Welcome to Commandline BudgetApp\n")
 home_prompt()
