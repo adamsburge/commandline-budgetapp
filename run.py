@@ -307,28 +307,30 @@ def delete_category():
     print(f"The {category_to_delete_name} category had £{category_to_delete_amount} delegated to it.\n")
     print("You will need to delegate this amount to another category.\n")
     
-    print(f"There is £{category_to_delete_amount} left to delegate. Where do you wish to delegate it?\n")
-    while True:
-        get_current_budget()
-        delegation_category_input = input("Type the number of the category you wish to delegate money to:\n")
-        if validate_category_num_entry(delegation_category_input):
-            break
-    
-    delegation_category = int(delegation_category_input)
-    delegation_category_name = main.row_values(delegation_category)[0]
-    original_delegation_category_amount = float(main.row_values(delegation_category)[1])
+    while category_to_delete_amount != 0:
+        print(f"There is £{category_to_delete_amount} left to delegate. Where do you wish to delegate it?\n")
+        while True:
+            get_current_budget()
+            delegation_category_input = input("Type the number of the category you wish to delegate money to:\n")
+            if validate_category_num_entry(delegation_category_input):
+                break
+        
+        delegation_category = int(delegation_category_input)
+        delegation_category_name = main.row_values(delegation_category)[0]
+        original_delegation_category_amount = float(main.row_values(delegation_category)[1])
 
-    while True:
-        print(" ")
-        print(f"{delegation_category_name} has £{original_delegation_category_amount}.\n")
-        amount_to_delegate_input = input(f"How much of the remaining £{category_to_delete_amount} do you wish to put towards {delegation_category_name}?\n")
-        if validate_delegation_max(amount_to_delegate_input, category_to_delete_amount):
-            break
-    amount_to_delegate = float(amount_to_delegate_input)
-    print(f"Adding £{amount_to_delegate} to {delegation_category_name}...")
-    new_delegation_category_amount = amount_to_delegate + original_delegation_category_amount
-    main.update_cell(delegation_category, 2, new_delegation_category_amount)
-    print("success!")
+        while True:
+            print(" ")
+            print(f"{delegation_category_name} has £{original_delegation_category_amount}.\n")
+            amount_to_delegate_input = input(f"How much of the remaining £{category_to_delete_amount} do you wish to put towards {delegation_category_name}?\n")
+            if validate_delegation_max(amount_to_delegate_input, category_to_delete_amount):
+                break
+        amount_to_delegate = float(amount_to_delegate_input)
+        print(f"Adding £{amount_to_delegate} to {delegation_category_name}...")
+        new_delegation_category_amount = amount_to_delegate + original_delegation_category_amount
+        main.update_cell(delegation_category, 2, new_delegation_category_amount)
+        category_to_delete_amount -= amount_to_delegate
+    print(f"You've delegated all the money from the {category_to_delete_name} category.")
 
 
 def validate_home_data(value):
