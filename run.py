@@ -209,7 +209,7 @@ Would you like to add or delete a category?
         if validate_y_n_entry(adjust_decision):
             break
     if adjust_decision == '1':
-        print("This will add a category")
+        add_category()
     else:
         print("This will delete a category")
 
@@ -249,6 +249,24 @@ Would you like to view more transactions?
         view_recent_transactions()
     else:
         home_prompt()
+
+
+def add_category():
+    """
+    Adds a category to the the category list. Allows the user to
+    select the name and the starting amount
+    """
+    new_category_name = input("What is the name of the new category?\n")
+    while True:
+        new_amount = input("How much money should this category start with?\n")
+        if validate_number_entry(new_amount):
+            break
+    new_category_amount = float(new_amount)
+
+    print(f"Adding a {new_category_name} category to your category list with a starting amount of £{new_amount}...\n")
+    new_category_list = [new_category_name, new_category_amount]
+    main.append_row(new_category_list)
+
 
 def validate_home_data(value):
     """
