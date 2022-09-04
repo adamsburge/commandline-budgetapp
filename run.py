@@ -49,7 +49,7 @@ def home_prompt():
     elif int(action) == 2:
         add_transaction()
     elif int(action) == 3:
-        print("You picked 3!")
+        adjust_categories()
     elif int(action) == 4:
         view_recent_transactions()
     else:
@@ -98,7 +98,7 @@ def add_paycheck():
         if validate_date_entry(date):
             break
 
-    paycheck_transaction = [float(paycheck), "My Employer", date]
+    paycheck_transaction = [float(paycheck), "My Employer", date, "Paycheck"]
     append_transaction_row(paycheck_transaction)
 
     print("Time to delegate the money from this paycheck!\n")
@@ -193,6 +193,27 @@ Would you like to add another transaction?
         home_prompt()
 
 
+def adjust_categories():
+    """
+    Lets the user select to either add or delete a category
+    """
+    print(
+"""
+Would you like to add or delete a category?
+1. Add
+2. Delete
+"""
+        )
+    while True:
+        adjust_decision = input("Type 1 or 2\n")
+        if validate_y_n_entry(adjust_decision):
+            break
+    if adjust_decision == '1':
+        print("This will add a category")
+    else:
+        print("This will delete a category")
+
+
 def view_recent_transactions():
     """
     Lets the user request to see a specified amount of recent transactions
@@ -202,18 +223,32 @@ def view_recent_transactions():
         transaction_amount_request = input(f"You have {amount_of_transactions} transactions listed. How many of the most recent would you like to see?\n")
         if validate_transaction_list_num_entry(transaction_amount_request, amount_of_transactions):
             break
-    transactions_list = transactions.get_all_values()
     amounts = transactions.col_values(1)
     institutions = transactions.col_values(2)
     date = transactions.col_values(3)
     category = transactions.col_values(4)
 
     print(f"Your {transaction_amount_request} most recent transactions are:\n")
-    print(f"   Amount — Institution — Date — Category\n")
+    print("   Amount — Institution — Date — Category\n")
     for i in range(int(transaction_amount_request)):
         counter = i + 1
         print(str(counter) + ". £ " + amounts[-counter] + " — " + institutions[-counter] + " — " + date[-counter] + " — " + category[-counter])
 
+    print(
+"""
+Would you like to view more transactions?
+1. Yes
+2. No
+"""
+        )
+    while True:
+        end_of_view_transaction_decision = input("Type 1 or 2\n")
+        if validate_y_n_entry(end_of_view_transaction_decision):
+            break
+    if end_of_view_transaction_decision == '1':
+        view_recent_transactions()
+    else:
+        home_prompt()
 
 def validate_home_data(value):
     """
