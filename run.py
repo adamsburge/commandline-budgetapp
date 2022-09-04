@@ -35,7 +35,7 @@ def home_prompt():
     print("Current Budget\n")
     get_current_budget()
     print("")
-    print(f"{Fore.YELLOW} What would you like to do?")
+    print(f"{Fore.YELLOW}What would you like to do?")
     print(
     """
     1. Add a Paycheck
@@ -492,7 +492,6 @@ def clear_terminal():
     the terminal of the last section.
     It resets colorama colors also.
     '''
-    print(Style.RESET_ALL)
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
