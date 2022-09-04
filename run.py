@@ -22,6 +22,7 @@ def home_prompt():
     Print the current budget details and 
     ask user which action they would like to perform
     """    
+    print_section_border()
     total_budgeted = get_total_budgeted_amount()
     print(f"Your current budgeted amount is £{total_budgeted} \n")
     print("Current Budget\n")
@@ -40,7 +41,9 @@ def home_prompt():
     while True:
         action = input("Type the number of the action you would like to perform:\n")
         if validate_home_data(action):
-            print("One second while we get things ready\n")
+            print(" ")
+            print("One second while we get things ready...")
+            print_section_border()
             break
     
     if int(action) == 1:
@@ -53,6 +56,7 @@ def home_prompt():
         view_recent_transactions()
     else:
         print("Thanks for budgeting! Exiting the Application...")
+        print(" ")
 
 
 def get_total_budgeted_amount():
@@ -96,24 +100,27 @@ def add_paycheck():
         date = input("When did you receive your paycheck? (DD-MM-YY) \n")
         if validate_date_entry(date):
             break
+    print_section_border()
 
     paycheck_transaction = [float(paycheck), "My Employer", date, "Paycheck"]
     append_transaction_row(paycheck_transaction)
 
+    print(" ")
     print("Time to delegate the money from this paycheck!\n")
     
     while left_to_delegate != 0:
+        print_section_border()
         print("To make sure you don't have any unbudgeted money, you must delegate all the paycheck.\n")
         print("Here is how your current budget stands:")
         get_current_budget()
         print(" ")
 
+        print(f"You have £{left_to_delegate} left to delegate from your paycheck.\n")
         while True:
             selected_category = input("Type the number of the category you wish to delegate money to:\n")
             if validate_category_num_entry(selected_category):
                 break
         
-        print(f"Great! You have £{left_to_delegate} left to delegate from your paycheck.\n")
         category_name = main.row_values(int(selected_category))[0]
         while True:
             amount_to_delegate = input(f"How much would you like to put towards {category_name}?\n")
@@ -129,8 +136,7 @@ def add_paycheck():
         
         left_to_delegate -= float(amount_to_delegate)
 
-        print(f"You now have £{left_to_delegate} from your paycheck.\n")
-    
+    print_section_border()
     print("You have delegated all your paycheck! Well done! Taking you back to the main menu.")
 
     home_prompt()
@@ -156,7 +162,7 @@ def add_transaction():
         if validate_date_entry(transaction_date):
             break
 
-    print(" ")
+    print_section_border()
     print(f"Great! From which category should this £{transaction_amount} payment to {transaction_institution} be deducted?\n")
     get_current_budget()
     print(" ")
@@ -167,6 +173,7 @@ def add_transaction():
             break
     
     transaction_category_name = main.row_values(int(transaction_selected_category))[0]
+    print(" ")
     print(f"Deducting £{transaction_amount} {transaction_institution} payment from {transaction_category_name}...")
     initial_category_amount = main.row_values(int(transaction_selected_category))[1]
     new_category_amount = float(initial_category_amount) - transaction_amount
@@ -175,10 +182,10 @@ def add_transaction():
     new_transaction_list = [-transaction_amount, transaction_institution, transaction_date, transaction_category_name]
     append_transaction_row(new_transaction_list)
 
+    print_section_border()
     while True:
         print(
-"""
-Would you like to add another transaction?
+"""Would you like to add another transaction?
 1. Yes
 2. No
 """
@@ -187,6 +194,7 @@ Would you like to add another transaction?
         if validate_y_n_entry(end_of_transaction_decision):
             break
     if end_of_transaction_decision == '1':
+        print_section_border()
         add_transaction()
     else:
         home_prompt()
@@ -197,8 +205,7 @@ def adjust_categories():
     Lets the user select to either add or delete a category
     """
     print(
-"""
-Would you like to add or delete a category?
+"""Would you like to add or delete a category?
 1. Add
 2. Delete
 """
@@ -208,8 +215,10 @@ Would you like to add or delete a category?
         if validate_y_n_entry(adjust_decision):
             break
     if adjust_decision == '1':
+        print_section_border()
         add_category()
     else:
+        print_section_border()
         delete_category()
 
 
@@ -227,6 +236,7 @@ def view_recent_transactions():
     date = transactions.col_values(3)
     category = transactions.col_values(4)
 
+    print_section_border()
     print(f"Your {transaction_amount_request} most recent transactions are:\n")
     print("   Amount — Institution — Date — Category\n")
     for i in range(int(transaction_amount_request)):
@@ -245,6 +255,7 @@ Would you like to view more transactions?
         if validate_y_n_entry(end_of_view_transaction_decision):
             break
     if end_of_view_transaction_decision == '1':
+        print_section_border()
         view_recent_transactions()
     else:
         home_prompt()
@@ -262,13 +273,13 @@ def add_category():
             break
     new_category_amount = float(new_amount)
 
-    print(f"Adding a {new_category_name} category to your category list with a starting amount of £{new_amount}...\n")
+    print(" ")
+    print(f"Adding a {new_category_name} category to your category list with a starting amount of £{new_amount}...")
     new_category_list = [new_category_name, new_category_amount]
     main.append_row(new_category_list)
-
+    print_section_border()
     print(
-"""
-Would you like to adjust another category?
+"""Would you like to adjust another category?
 1. Yes
 2. No
 """
@@ -278,6 +289,7 @@ Would you like to adjust another category?
         if validate_y_n_entry(end_of_add_category_decision):
             break
     if end_of_add_category_decision == '1':
+        print_section_border()
         adjust_categories()
     else:
         home_prompt()    
@@ -290,6 +302,7 @@ def delete_category():
     """
     print("Not a problem. Here is a list of your current categories:\n")
     get_current_budget()
+    print(" ")
     while True:
         delete_selected_category = input("Type the number of the category you wish to delete:\n")
         if validate_category_num_entry(delete_selected_category):
@@ -300,8 +313,9 @@ def delete_category():
     category_to_delete_amount = float(main.row_values(category_to_delete)[1])
 
     print(" ")
-    print(f"Deleting {category_to_delete_name} category...\n")
+    print(f"Deleting {category_to_delete_name} category...")
     main.delete_rows(category_to_delete)
+    print_section_border()
 
     print(f"The {category_to_delete_name} category had £{category_to_delete_amount} delegated to it.\n")
     print("You will need to delegate this amount to another category.\n")
@@ -310,6 +324,7 @@ def delete_category():
         print(f"There is £{category_to_delete_amount} left to delegate from {category_to_delete_name}. Where do you wish to delegate it?\n")
         while True:
             get_current_budget()
+            print(" ")
             delegation_category_input = input("Type the number of the category you wish to delegate money to:\n")
             if validate_category_num_entry(delegation_category_input):
                 break
@@ -325,11 +340,12 @@ def delete_category():
             if validate_delegation_max(amount_to_delegate_input, category_to_delete_amount):
                 break
         amount_to_delegate = float(amount_to_delegate_input)
+        print(" ")
         print(f"Adding £{amount_to_delegate} to {delegation_category_name}...")
         new_delegation_category_amount = amount_to_delegate + original_delegation_category_amount
         main.update_cell(delegation_category, 2, new_delegation_category_amount)
         category_to_delete_amount -= amount_to_delegate
-    print(" ")
+        print_section_border()
     print(f"You've delegated all the money from the {category_to_delete_name} category.\n")
 
     print(
@@ -344,6 +360,7 @@ Would you like to adjust another category?
         if validate_y_n_entry(end_of_add_category_decision):
             break
     if end_of_add_category_decision == '1':
+        print_section_border()
         adjust_categories()
     else:
         home_prompt()  
@@ -461,5 +478,6 @@ def print_section_border():
     print("----------------------------------")
     print(" ")
 
-print("Welcome to Commandline BudgetApp\n")
+print_section_border()
+print("Welcome to Commandline BudgetApp")
 home_prompt()
