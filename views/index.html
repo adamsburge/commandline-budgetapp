@@ -1,5 +1,5 @@
 <body>
-    <h1>Commandline BudgetApp</h1>
+    <h1 id="title">Commandline BudgetApp</h1>
     <div id="button-div">
         <button onclick="window.location.reload()">Start Commandline BudgetApp</button>
     </div>
@@ -9,7 +9,7 @@
 
     <script>
         var term = new Terminal({
-            cols: 95,
+            cols: 85,
             rows: 40
         });
         term.open(document.getElementById('terminal'));
