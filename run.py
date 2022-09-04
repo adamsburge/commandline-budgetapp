@@ -29,7 +29,7 @@ def home_prompt():
     Print the current budget details and 
     ask user which action they would like to perform
     """    
-    print("----------------------------------")
+    print("----------------------------------\n")
     print(f"{Style.BRIGHT}Commandline BudgetApp Dashboard")
     print_section_border()
     total_budgeted = get_total_budgeted_amount()
