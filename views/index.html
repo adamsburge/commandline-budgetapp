@@ -1,14 +1,16 @@
 <body>
-    <div id="terminal"></div>
+    <h1>Commandline BudgetApp</h1>
     <div id="button-div">
         <button onclick="window.location.reload()">Start Commandline BudgetApp</button>
     </div>
+    <div id="terminal"></div>
+    
     
 
     <script>
         var term = new Terminal({
             cols: 95,
-            rows: 50
+            rows: 40
         });
         term.open(document.getElementById('terminal'));
         term.writeln('Running startup command: python3 run.py');
