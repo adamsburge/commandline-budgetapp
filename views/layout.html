@@ -11,7 +11,7 @@
     <title>Python Terminal by Code Institute</title>
     <style>
         body {
-            font-family: Arial;
+            font-family: serif;
         }
 
         /**
@@ -61,7 +61,7 @@
 
         .xterm .composition-view {
             /* TODO: Composition position got messed up somewhere */
-            background: #000;
+            background: #D92B2B;
             color: #FFF;
             display: none;
             position: absolute;
@@ -167,7 +167,8 @@
             color: white;
             text-transform: uppercase;
             margin: 10px;
-            border-radius: 8px;
+            border-radius: 5px;
+            font-family: serif;
         }
 
         #button-div {
@@ -175,8 +176,16 @@
         }
 
         #terminal-div {
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
         }
+
+        #terminal {
+            border: 15px solid black;
+            border-radius: 5px;
+        }
+
     </style>
 </head>
 
