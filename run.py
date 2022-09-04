@@ -104,7 +104,7 @@ def add_paycheck():
     Receive Paycheck information, validate entries and, if valid, allow the user
     to delegate money to various categories. Then return to the home prompt.
     """
-    print("----------------------------------")
+    print("----------------------------------\n")
     print(f"{Style.BRIGHT}Just a few questions about your paycheck:")
     print_section_border()
 
