@@ -3,7 +3,7 @@ import os
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 from colorama import init
-from colorama import Fore
+from colorama import Fore, Style
 init()
 init(autoreset=True)
 
@@ -91,7 +91,7 @@ def get_current_budget():
         num_2_spacing_amount = 28 - len(str(k))
         spacing_1_amount = space*num_1_spacing_amount 
         spacing_2_amount = dash*num_2_spacing_amount      
-        print(str(category_num) + "." + spacing_1_amount + str(k) + ":" + spacing_2_amount + "£ " + str(v))
+        print(str(category_num) + "." + spacing_1_amount + str(k) + ":" + spacing_2_amount + Fore.GREEN + "£" + str(v))
         category_num += 1
 
 
@@ -100,15 +100,19 @@ def add_paycheck():
     Receive Paycheck information, validate entries and, if valid, allow the user
     to delegate money to various categories. Then return to the home prompt.
     """
+    print_section_border()
+    print(f"{Style.BRIGHT}Just a few questions about your paycheck:")
+    print_section_border()
+
     while True:
-        paycheck = input("How much is your paycheck?\n")
+        paycheck = input(f"{Fore.YELLOW}How much is your paycheck?\n")
         if validate_number_entry(paycheck):
             break
 
     left_to_delegate = float(paycheck)
-
+    print(" ")
     while True:
-        date = input("When did you receive your paycheck? (DD-MM-YY)\n")
+        date = input(f"{Fore.YELLOW}When did you receive your paycheck? (DD-MM-YY)\n")
         if validate_date_entry(date):
             break
     print_section_border()
@@ -117,29 +121,32 @@ def add_paycheck():
     append_transaction_row(paycheck_transaction)
 
     print(" ")
-    print("Time to delegate the money from this paycheck!\n")
+    print(f"{Style.BRIGHT}Time to delegate the money from this paycheck!\n")
     
     while left_to_delegate != 0:
         print_section_border()
-        print("To make sure you don't have any unbudgeted money, you must delegate all the paycheck.\n")
+        print(f"{Fore.BLUE}{Style.BRIGHT}To make sure you don't have any unbudgeted money, you must delegate all the paycheck.\n")
         print("Here is how your current budget stands:")
+        print(" ")
         get_current_budget()
         print(" ")
 
-        print(f"You have £{left_to_delegate} left to delegate from your paycheck.\n")
+        print(f"You have {Fore.GREEN}£{left_to_delegate}{Fore.RESET} left to delegate from your paycheck.\n")
         while True:
-            selected_category = input("Type the number of the category you wish to delegate money to:\n")
+            selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to delegate money to:\n")
             if validate_category_num_entry(selected_category):
                 break
         
+        print(" ")
         category_name = main.row_values(int(selected_category))[0]
         while True:
-            amount_to_delegate = input(f"How much would you like to put towards {category_name}?\n")
+            amount_to_delegate = input(f"{Fore.YELLOW}How much would you like to put towards {category_name}?\n")
             if validate_number_entry(amount_to_delegate):
                 if validate_delegation_max(amount_to_delegate, left_to_delegate):
                     break
         
-        print(f"Perfect. Adding £{amount_to_delegate} to {category_name}\n")
+        print(" ")
+        print(f"Perfect. Adding {Fore.GREEN}£{amount_to_delegate}{Fore.RESET} to {category_name}\n")
         
         initial_category_amount = main.row_values(int(selected_category))[1]
         new_category_amount = float(initial_category_amount) + float(amount_to_delegate)
@@ -147,6 +154,7 @@ def add_paycheck():
         
         left_to_delegate -= float(amount_to_delegate)
 
+    clear_terminal()
     print_section_border()
     print("You have delegated all your paycheck! Well done! Taking you back to the main menu.")
 
