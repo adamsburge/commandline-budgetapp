@@ -166,34 +166,38 @@ def add_transaction():
     Receives new transaction information, deducts money from appropriate
     budget categories, adds transaction to transaction list.
     """
+    print_section_border()
+    print(f"{Style.BRIGHT}Just a few questions about your transaction:")
+    print_section_border()
+
     while True:
-        transaction = input("How much is the transaction?\n")
+        transaction = input(f"{Fore.YELLOW}How much is the transaction?\n")
         if validate_number_entry(transaction):
             break
     transaction_amount = float(transaction)
     
     print(" ")
-    transaction_institution = input("Who did you pay?\n")
+    transaction_institution = input(f"{Fore.YELLOW}Which institution or person received the money?\n")
 
     while True:
         print(" ")
-        transaction_date = input("When did you make this payment? (DD-MM-YY)\n")
+        transaction_date = input(f"{Fore.YELLOW}When did you make this payment? (DD-MM-YY)\n")
         if validate_date_entry(transaction_date):
             break
 
     print_section_border()
-    print(f"Great! From which category should this £{transaction_amount} payment to {transaction_institution} be deducted?\n")
+    print(f"Great! From which category should this {Fore.RED}£{transaction_amount}{Fore.RESET} payment to {transaction_institution} be deducted?\n")
     get_current_budget()
     print(" ")
 
     while True:
-        transaction_selected_category = input("Type the number of the category this transaction falls under:\n")
+        transaction_selected_category = input(f"{Fore.YELLOW}Type the number of the category this transaction falls under:\n")
         if validate_category_num_entry(transaction_selected_category):
             break
     
     transaction_category_name = main.row_values(int(transaction_selected_category))[0]
     print(" ")
-    print(f"Deducting £{transaction_amount} {transaction_institution} payment from {transaction_category_name}...")
+    print(f"Deducting {Fore.RED}£{transaction_amount}{Fore.RESET} {transaction_institution} payment from {transaction_category_name}...")
     initial_category_amount = main.row_values(int(transaction_selected_category))[1]
     new_category_amount = float(initial_category_amount) - transaction_amount
     main.update_cell(int(transaction_selected_category), 2, new_category_amount)
@@ -213,9 +217,10 @@ def add_transaction():
         if validate_y_n_entry(end_of_transaction_decision):
             break
     if end_of_transaction_decision == '1':
-        print_section_border()
+        clear_terminal()
         add_transaction()
     else:
+        clear_terminal()
         home_prompt()
 
 
