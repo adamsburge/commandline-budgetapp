@@ -804,7 +804,49 @@ def startup_view():
     print(" ")
     txt_effect("----------------------------------\n")
     time.sleep(1.7)
-    clear_terminal()
 
-startup_view()
-home_prompt()
+def set_up_new_budget():
+    """
+    Guides the user through a process to set up a new budget
+    """
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}This will set up a new budget")
+    print_section_border()
+    time.sleep(2)
+
+
+def startup_prompt():
+    """
+    Function called at the launch of the program.
+    It plays the startup view, then allows the user to either
+    keep using their old budget or create a new one
+    """
+    startup_view()
+    print(
+    """
+Would you like to keep using your old budget or create a new one?
+
+1. Keep using my old budget
+2. Start a New Budget (Select this if you're new to the app!)
+"""
+        )
+    while True:
+        keep_or_start = input(f"{Fore.YELLOW}Type 1 or 2\n")
+        if validate_y_n_entry(keep_or_start):
+            break
+    if keep_or_start == '1':
+        clear_terminal()
+        print(f"{Fore.RESET}----------------------------------\n")
+        print(f"{Style.BRIGHT}Welcome Back. Retrieving your Budget...")
+        print_section_border()
+        time.sleep(2)
+        clear_terminal()
+        home_prompt()
+    else:
+        clear_terminal()
+        set_up_new_budget()
+
+
+
+
+startup_prompt()
