@@ -2,7 +2,6 @@ import gspread
 import os
 import time
 import sys
-import math
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 from colorama import init
@@ -373,6 +372,7 @@ def adjust_categories():
         adjust_decision = input(f"{Fore.YELLOW}Type 1 or 2\n")
         if validate_y_n_entry(adjust_decision):
             break
+    print(f"{Fore.RESET}")
     if adjust_decision == '1':
         clear_terminal()
         add_category()
@@ -432,10 +432,15 @@ def add_category():
     Adds a category to the the category list. Allows the user to
     select the name and the starting amount
     """
+    print("----------------------------------\n")
+    print(f"{Style.BRIGHT}Let's add your new category:")
+    print_section_border()
+
     new_category_name = input(f"{Fore.YELLOW}What is the name of the new category?\n")
 
     print(" ")
-    print(f"Adding a {new_category_name} category to your category list and setting starting amount to £0...")
+    print(f"Adding a {new_category_name} category to your category list...\n")
+    print(f"Setting {new_category_name}'s starting amount to £0...")
     new_category_list = [new_category_name, 0]
     main.append_row(new_category_list)
     print_section_border()
@@ -462,7 +467,11 @@ def delete_category():
     Allows the user to select the category to delete from the category list.
     Then prompts the user to redelegate the money from that category.
     """
-    print(f"{Fore.RESET}Not a problem. Here is a list of your current categories:\n")
+    print("----------------------------------\n")
+    print(f"{Style.BRIGHT}Not a problem. Let's find the category you want to delete:")
+    print_section_border()
+    
+    print(f"{Fore.RESET}Here is a list of your current categories:\n")
     get_current_budget()
     print(" ")
     while True:
@@ -511,6 +520,7 @@ def delete_category():
         category_to_delete_amount -= amount_to_delegate
         print("----------------------------------\n")
     clear_terminal()
+    print("----------------------------------\n")
     print(f"{Style.BRIGHT}You've delegated all the money from the {category_to_delete_name} category.")
     print_section_border()
 
