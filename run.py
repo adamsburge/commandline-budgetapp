@@ -3,7 +3,7 @@ import os
 import time
 import sys
 from google.oauth2.service_account import Credentials
-from datetime import datetime
+from datetime import datetime, date
 from colorama import init
 from colorama import Fore, Style
 init()
@@ -810,9 +810,145 @@ def set_up_new_budget():
     Guides the user through a process to set up a new budget
     """
     print(f"{Fore.RESET}----------------------------------\n")
-    print(f"{Style.BRIGHT}This will set up a new budget")
+    print(f"{Style.BRIGHT}Let's get your new budget set up")
+    print_section_border()
+    print("Here is our preset budget:")
+    print(
+    f"""
+1.  Rent:------------------------{Fore.GREEN}£0{Fore.RESET}
+2.  Utilities:-------------------{Fore.GREEN}£0{Fore.RESET}
+3.  Phone Bill:------------------{Fore.GREEN}£0{Fore.RESET}
+4.  Insurance:-------------------{Fore.GREEN}£0{Fore.RESET}
+5.  Debt:------------------------{Fore.GREEN}£0{Fore.RESET}
+6.  Retirement:------------------{Fore.GREEN}£0{Fore.RESET}
+7.  Groceries:-------------------{Fore.GREEN}£0{Fore.RESET}
+8.  Transportation:--------------{Fore.GREEN}£0{Fore.RESET}
+9.  Entertainment:---------------{Fore.GREEN}£0{Fore.RESET}
+10. Travel:----------------------{Fore.GREEN}£0{Fore.RESET}
+11. Miscellaneous:---------------{Fore.GREEN}£0{Fore.RESET}
+12. Spending Money:--------------{Fore.GREEN}£0{Fore.RESET}
+"""
+        )
+    print(f"{Fore.BLUE}Would you like to use the preset budget or build your own?{Fore.RESET}\n")
+    print("(Both will allow you to further adjust your categories categories after the setup)")
+    print(
+    """
+1. I'll use the preset
+2. I want to build my own
+"""
+        )
+    while True:
+        preset_or_build = input(f"{Fore.YELLOW}Type 1 or 2\n")
+        if validate_y_n_entry(preset_or_build):
+            break
+    if preset_or_build == '1':
+        clear_terminal()
+        print(f"{Fore.RESET}----------------------------------\n")
+        print(f"{Style.BRIGHT}Setting up your budget...")
+        print_section_border()
+        time.sleep(2)
+        main.clear()
+        num_of_rows = int(transactions.row_count)
+        transactions.delete_rows(2, num_of_rows)
+        clear_terminal()
+        set_up_preset_budget()
+        add_money_to_new_budget()
+    else:
+        main.clear()
+        num_of_rows = int(transactions.row_count) - 1
+        transactions.delete_rows(2, num_of_rows)
+        clear_terminal()
+        build_new_budget()
+        add_money_to_new_budget()
+
+
+def set_up_preset_budget():
+    """
+    Fills the budget spreadsheet with preset data
+    """
+    preset_categories = [["Rent", 0], ["Utilities", 0], ["Phone Bil", 0], ["Insurance", 0], ["Debt", 0], ["Retirement", 0], ["Groceries", 0], ["Transportation", 0], ["Entertainment", 0], ["Travel", 0], ["Miscellaneous", 0], ["Spending Money", 0]]
+    main.append_rows(preset_categories)
+
+
+def add_money_to_new_budget():
+    """
+    Prompts the user to input their bank balance and then delegate money
+    """
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Let's add some money")
+    print_section_border()
+
+    print("Here is your current Budget\n")
+    get_current_budget()
+
+    print(" ")
+    print(f"{Fore.BLUE}This budget relies on the budgeted amount matching your bank account balance.\n")
+
+    while True:
+        bank_balance = input(f"{Fore.YELLOW}How much is currently in your bank account?\n")
+        if validate_number_entry(bank_balance):
+            break
+    left_to_delegate = float(bank_balance)
+    get_today = date.today()
+    today = get_today.strftime("%d-%m-%y")
+
+    initial_transaction = [left_to_delegate, "Initial Bank Balance", today, "Income"]
+    append_transaction_row(initial_transaction)
+
+    clear_terminal()
+    print_section_border()
+    print(f"{Style.BRIGHT}Time to delegate the money from this balance")
+    
+    while left_to_delegate != 0:
+        print_section_border()
+        print(f"{Fore.BLUE}{Style.BRIGHT}To make sure you don't have any unbudgeted money, you must delegate all this balance.\n")
+        print("Here is how your current budget stands:")
+        print(" ")
+        get_current_budget()
+        print(" ")
+
+        left_to_delegate = round(float(left_to_delegate), 2)
+        print(f"You have {Fore.GREEN}£{left_to_delegate}{Fore.RESET} left to delegate from your balance.\n")
+        while True:
+            selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to delegate money to:\n")
+            if validate_category_num_entry(selected_category):
+                break
+        
+        print(" ")
+        category_name = main.row_values(int(selected_category))[0]
+        while True:
+            amount_to_delegate = input(f"{Fore.YELLOW}How much would you like to put towards {category_name}?\n")
+            if validate_number_entry(amount_to_delegate):
+                if validate_delegation_max(amount_to_delegate, left_to_delegate):
+                    break
+        
+        rounded_down_amount_to_delegate = round(float(amount_to_delegate), 2)
+        print(" ")
+        print(f"Perfect. Adding {Fore.GREEN}£{rounded_down_amount_to_delegate}{Fore.RESET} to {category_name}\n")
+        
+        initial_category_amount = main.row_values(int(selected_category))[1]
+        new_category_amount = float(initial_category_amount) + rounded_down_amount_to_delegate
+        main.update_cell(int(selected_category), 2, new_category_amount)
+        
+        left_to_delegate -= rounded_down_amount_to_delegate
+
+    clear_terminal()
+    print("----------------------------------\n")
+    print("You have delegated all your bank balance! Well done!")
     print_section_border()
     time.sleep(2)
+    clear_terminal()
+    print("----------------------------------\n")
+    print("Setting up your dashboard...")
+    print_section_border()
+    time.sleep(2)
+    clear_terminal()
+    home_prompt()
+
+def build_new_budget():
+    """
+    Allows the user to input their own categories into the cleared budget
+    """
 
 
 def startup_prompt():
