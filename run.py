@@ -562,7 +562,6 @@ def update_higher_bank_balance(bank_balance):
     clear_terminal()
 
 
-
 def update_lower_bank_balance(bank_balance):
     """
     Tells the user their bank balance is lower than their budget
@@ -753,12 +752,19 @@ def txt_effect(text_to_print):
         sys.stdout.flush()
         time.sleep(0.03)
 
-clear_terminal()
-txt_effect("----------------------------------\n")
-print(" ")
-txt_effect("Welcome to Commandline BudgetApp\n")
-print(" ")
-txt_effect("----------------------------------\n")
-time.sleep(1.7)
-clear_terminal()
+
+def startup_view():
+    """
+    Playsw the startup welcome effect
+    """
+    clear_terminal()
+    txt_effect("----------------------------------\n")
+    print(" ")
+    txt_effect("Welcome to Commandline BudgetApp\n")
+    print(" ")
+    txt_effect("----------------------------------\n")
+    time.sleep(1.7)
+    clear_terminal()
+
+startup_view()
 home_prompt()
