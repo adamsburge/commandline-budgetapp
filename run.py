@@ -294,6 +294,23 @@ def redelegate():
 
     get_current_budget()
 
+    print_section_border()
+    while True:
+        print(
+"""Would you like to move more money?
+1. Yes
+2. No
+"""
+        )
+        end_of_transaction_decision = input("Type 1 or 2\n")
+        if validate_y_n_entry(end_of_transaction_decision):
+            break
+    if end_of_transaction_decision == '1':
+        clear_terminal()
+        redelegate()
+    else:
+        clear_terminal()
+        home_prompt()
 
 def adjust_categories():
     """
