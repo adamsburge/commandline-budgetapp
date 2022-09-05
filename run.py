@@ -267,10 +267,10 @@ def redelegate():
     to_category_amount = main.row_values(int(to_category_input))[1]
 
     print(" ")
-    print(f"{from_category_name} has {Fore.GREEN}£{from_category_amount}{Fore.RESET} and {to_category_name} has {Fore.GREEN}£{to_category_amount}{Fore.RESET}.\n")
+    print(f"{from_category_name} has {Fore.GREEN}£{from_category_amount}{Fore.RESET} and {Fore.BLUE}{to_category_name}{Fore.RESET} has {Fore.GREEN}£{to_category_amount}{Fore.RESET}.\n")
 
     while True:
-        transfer_amount_input = input(f"{Fore.YELLOW}How much of {from_category_name}'s {Fore.GREEN}£{from_category_amount}{Fore.YELLOW} would you like to move to the {to_category_name} category?\n")
+        transfer_amount_input = input(f"{Fore.YELLOW}How much of {Fore.BLUE}{from_category_name}{Fore.RESET}'s {Fore.GREEN}£{from_category_amount}{Fore.YELLOW} would you like to move to the {Fore.BLUE}{to_category_name}{Fore.RESET} category?\n")
         if validate_delegation_max(transfer_amount_input, from_category_amount):
             break        
     
@@ -490,10 +490,10 @@ def validate_home_data(value):
     """
     try:
         if int(value) > 7:
-            raise ValueError(f"You must enter a {Fore.BLUE}number{Fore.RESET} between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}5{Fore.RESET}. You entered {Fore.RED}{value}")
+            raise ValueError(f"You must enter a {Fore.BLUE}number{Fore.RESET} between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}5{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
         print(" ")
-        print(f"Invalid entry: {Fore.RED}{e}{Fore.RESET}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
+        print(f"Invalid entry: {e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
         return False
     return True
 
@@ -507,7 +507,7 @@ def validate_number_entry(value):
             raise ValueError(f"You must enter a {Fore.BLUE}number greater than 1{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
         print(" ")
-        print(f"Invalid entry: {Fore.RED}{e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
+        print(f"Invalid entry: {e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
         return False
     return True
 
@@ -522,7 +522,7 @@ def validate_category_num_entry(value):
             raise ValueError(f"You must enter a {Fore.BLUE}number{Fore.RESET} between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}{entry_amount}{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
         print(" ")
-        print(f"Invalid entry: {Fore.RED}{e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
+        print(f"Invalid entry: {e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
         return False
     return True
 
@@ -538,7 +538,7 @@ def validate_delegation_max(value, max):
             raise ValueError(f"You must enter a {Fore.BLUE}number{Fore.RESET} between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}{max}{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
         print(" ")
-        print(f"Invalid entry: {Fore.RED}{e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
+        print(f"Invalid entry: {e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
         return False
     return True
 
@@ -566,7 +566,7 @@ def validate_y_n_entry(value):
             raise ValueError(f"You must enter either {Fore.BLUE}1{Fore.RESET} or {Fore.BLUE}2{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
         print(" ")
-        print(f"Invalid entry: {Fore.RED}{e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
+        print(f"Invalid entry: {e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
         return False
     return True
 
@@ -580,7 +580,7 @@ def validate_transaction_list_num_entry(value, max):
             raise ValueError(f"You must enter a {Fore.BLUE}number{Fore.RESET} between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}{max}{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}\n")
     except ValueError as e:
         print(" ")
-        print(f"Invalid entry: {Fore.RED}{e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
+        print(f"Invalid entry: {e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
         return False
     return True
 
@@ -621,7 +621,7 @@ def txt_effect(text_to_print):
         sys.stdout.flush()
         time.sleep(0.03)
 
-
+clear_terminal()
 txt_effect("----------------------------------\n")
 print(" ")
 txt_effect("Welcome to Commandline BudgetApp\n")
