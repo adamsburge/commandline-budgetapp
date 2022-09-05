@@ -43,9 +43,9 @@ def home_prompt():
     1. Add an Income Transaction
     2. Add a Payment Transaction
     3. Redelegate/Move Money Around
-    4. My Bank Balance Doesn't Match the Budgeted Amount
+    4. View Recent Transactions
     5. Add or Delete Categories
-    6. View Recent Transactions
+    6. My Bank Balance Doesn't Match the Budgeted Amount
     7. I'm done budgeting
     """
     )
@@ -64,12 +64,18 @@ def home_prompt():
     elif int(action) == 3:
         redelegate()
     elif int(action) == 4:
-        update_balance()
-        home_prompt()
+        view_recent_transactions()
     elif int(action) == 5:
         adjust_categories()
     elif int(action) == 6:
-        view_recent_transactions()
+        clear_terminal()
+        print("----------------------------------\n")
+        print("We get it. We sometimes forget to budget too...")
+        print_section_border()
+        time.sleep(2)
+        clear_terminal()
+        update_balance()
+        home_prompt()
     else:
         print("----------------------------------\n")
         print(" ")
@@ -138,10 +144,11 @@ def add_paycheck():
     append_transaction_row(paycheck_transaction)
 
     clear_terminal()
-    print_section_border()
-    print(f"{Style.BRIGHT}Time to delegate the money from this income!")
+    
     
     while left_to_delegate != 0:
+        print_section_border()
+        print(f"{Style.BRIGHT}Time to delegate the money from this income!")
         print_section_border()
         print(f"{Fore.BLUE}{Style.BRIGHT}To make sure you don't have any unbudgeted money, you must delegate all the paycheck.\n")
         print("Here is how your current budget stands:")
@@ -166,13 +173,15 @@ def add_paycheck():
         
         rounded_down_amount_to_delegate = round(float(amount_to_delegate), 2)
         print(" ")
-        print(f"Perfect. Adding {Fore.GREEN}£{rounded_down_amount_to_delegate}{Fore.RESET} to {category_name}\n")
+        print(f"Perfect. Adding {Fore.GREEN}£{rounded_down_amount_to_delegate}{Fore.RESET} to {category_name}...\n")
         
         initial_category_amount = main.row_values(int(selected_category))[1]
         new_category_amount = float(initial_category_amount) + rounded_down_amount_to_delegate
         main.update_cell(int(selected_category), 2, new_category_amount)
         
         left_to_delegate -= rounded_down_amount_to_delegate
+        time.sleep(1.7)
+        clear_terminal()
 
     clear_terminal()
     print("----------------------------------\n")
@@ -241,6 +250,9 @@ def add_transaction():
     new_transaction_list = [-transaction_amount, transaction_institution, transaction_date, transaction_category_name]
     append_transaction_row(new_transaction_list)
 
+    clear_terminal()
+    print("----------------------------------\n")
+    print(f"{Style.BRIGHT}Success! Your transaction has been budgeted.")
     print_section_border()
     while True:
         print(
@@ -486,16 +498,24 @@ def delete_category():
     category_to_delete_name = main.row_values(category_to_delete)[0]
     category_to_delete_amount = float(main.row_values(category_to_delete)[1])
 
-    print(" ")
+    clear_terminal()
+    print(f"{Fore.RESET}----------------------------------\n")
     print(f"Deleting {category_to_delete_name} category...")
-    main.delete_rows(category_to_delete)
     print_section_border()
+    main.delete_rows(category_to_delete)
+    
 
     category_to_delete_amount = round(float(category_to_delete_amount), 2)
     print(f"{Fore.BLUE}The {category_to_delete_name} category had {Fore.GREEN}£{category_to_delete_amount}{Fore.BLUE} delegated to it.\n")
     print("You will need to delegate this amount to another category.\n")
     
+    while_count = 0
     while category_to_delete_amount != 0:
+        if while_count > 0:
+            clear_terminal()
+            print(f"{Fore.RESET}----------------------------------\n")
+            print(f"{Fore.GREEN}£{amount_to_delegate}{Fore.RESET} Added to {delegation_category_name}")
+            print_section_border()
         category_to_delete_amount = round(float(category_to_delete_amount), 2)
         print(f"There is {Fore.GREEN}£{category_to_delete_amount}{Fore.RESET} left to delegate from {category_to_delete_name}. Where do you wish to delegate it?\n")
         while True:
@@ -521,7 +541,8 @@ def delete_category():
         new_delegation_category_amount = amount_to_delegate + original_delegation_category_amount
         main.update_cell(delegation_category, 2, new_delegation_category_amount)
         category_to_delete_amount -= amount_to_delegate
-        print("----------------------------------\n")
+        time.sleep(2)
+        while_count += 1
     clear_terminal()
     print("----------------------------------\n")
     print(f"{Style.BRIGHT}You've delegated all the money from the {category_to_delete_name} category.")
@@ -536,6 +557,7 @@ Would you like to adjust another category?
         )
     while True:
         end_of_add_category_decision = input(f"{Fore.YELLOW}Type 1 or 2\n")
+        print(f"{Fore.RESET}")
         if validate_y_n_entry(end_of_add_category_decision):
             break
     if end_of_add_category_decision == '1':
@@ -561,12 +583,19 @@ def update_higher_bank_balance(bank_balance):
     budgeted_amount = get_total_budgeted_amount()
     left_to_delegate = round(bank_balance, 2) - round(budgeted_amount, 2)
 
+    while_count = 0
     while left_to_delegate != 0:
+        left_to_delegate = round(float(left_to_delegate), 2)
+        if while_count > 0:
+            clear_terminal()
+            print(f"{Fore.RESET}----------------------------------\n")
+            print(f"{Fore.GREEN}£{left_to_delegate}{Fore.RESET} added to {category_name}")
+            print_section_border()
         print("Here is how your current budget stands:")
         print(" ")
         get_current_budget()
         print(" ")
-        
+            
         left_to_delegate = round(left_to_delegate, 2)
         print(f"You have {Fore.GREEN}£{left_to_delegate}{Fore.RESET} left to delegate.\n")
         while True:
@@ -584,17 +613,19 @@ def update_higher_bank_balance(bank_balance):
         amount_to_delegate = round(float(amount_to_delegate), 2)
 
         print(" ")
-        print(f"Perfect. Adding {Fore.GREEN}£{amount_to_delegate}{Fore.RESET} to {category_name}\n")
+        print(f"Perfect. Adding {Fore.GREEN}£{amount_to_delegate}{Fore.RESET} to {category_name}...\n")
         
         initial_category_amount = main.row_values(int(selected_category))[1]
         new_category_amount = float(initial_category_amount) + float(amount_to_delegate)
         main.update_cell(int(selected_category), 2, new_category_amount)
+        time.sleep(2)
         
         left_to_delegate -= float(amount_to_delegate)
+        while_count += 1
     
     clear_terminal()
     print("----------------------------------\n")
-    print("Sucess! You've finished delegating and your bank balance now matches the budget")
+    print("Success! You've finished delegating and your bank balance now matches the budget")
     print_section_border()
     time.sleep(2.5)
     clear_terminal()
@@ -615,7 +646,14 @@ def update_lower_bank_balance(bank_balance):
     budgeted_amount = get_total_budgeted_amount()
     left_to_deduct = round(float(budgeted_amount), 2) - round(float(bank_balance), 2)
 
+    while_count = 0
     while left_to_deduct != 0:
+        left_to_deduct = round(float(left_to_deduct), 2)
+        if while_count > 0:
+            clear_terminal()
+            print(f"{Fore.RESET}----------------------------------\n")
+            print(f"{Fore.RED}£{left_to_deduct}{Fore.RESET} deducted from {category_name}")
+            print_section_border()
         print("Here is how your current budget stands:")
         print(" ")
         get_current_budget()
@@ -645,10 +683,11 @@ def update_lower_bank_balance(bank_balance):
         main.update_cell(int(selected_category), 2, new_category_amount)
         
         left_to_deduct -= float(amount_to_deduct)
+        while_count += 1
     
     clear_terminal()
     print("----------------------------------\n")
-    print("Sucess! You've finished deducting money from your categories")
+    print("Success! You've finished deducting money from your categories")
     print("and your bank balance now matches the budget")
     print_section_border()
     time.sleep(2.5)
@@ -849,14 +888,16 @@ def set_up_new_budget():
         time.sleep(2)
         main.clear()
         num_of_rows = int(transactions.row_count)
-        transactions.delete_rows(2, num_of_rows)
+        if num_of_rows > 1:
+            transactions.delete_rows(2, num_of_rows)
         clear_terminal()
         set_up_preset_budget()
         add_money_to_new_budget()
     else:
         main.clear()
-        num_of_rows = int(transactions.row_count) - 1
-        transactions.delete_rows(2, num_of_rows)
+        num_of_rows = int(transactions.row_count)
+        if num_of_rows > 1:
+            transactions.delete_rows(2, num_of_rows)
         clear_terminal()
         build_new_budget()
         add_money_to_new_budget()
@@ -866,7 +907,7 @@ def set_up_preset_budget():
     """
     Fills the budget spreadsheet with preset data
     """
-    preset_categories = [["Rent", 0], ["Utilities", 0], ["Phone Bil", 0], ["Insurance", 0], ["Debt", 0], ["Retirement", 0], ["Groceries", 0], ["Transportation", 0], ["Entertainment", 0], ["Travel", 0], ["Miscellaneous", 0], ["Spending Money", 0]]
+    preset_categories = [["Rent", 0], ["Utilities", 0], ["Phone Bill", 0], ["Insurance", 0], ["Debt", 0], ["Retirement", 0], ["Groceries", 0], ["Transportation", 0], ["Entertainment", 0], ["Travel", 0], ["Miscellaneous", 0], ["Spending Money", 0]]
     main.append_rows(preset_categories)
 
 
@@ -896,10 +937,11 @@ def add_money_to_new_budget():
     append_transaction_row(initial_transaction)
 
     clear_terminal()
-    print_section_border()
-    print(f"{Style.BRIGHT}Time to delegate the money from this balance")
+    
     
     while left_to_delegate != 0:
+        print_section_border()
+        print(f"{Style.BRIGHT}Time to delegate the money from this balance")
         print_section_border()
         print(f"{Fore.BLUE}{Style.BRIGHT}To make sure you don't have any unbudgeted money, you must delegate all this balance.\n")
         print("Here is how your current budget stands:")
@@ -924,13 +966,15 @@ def add_money_to_new_budget():
         
         rounded_down_amount_to_delegate = round(float(amount_to_delegate), 2)
         print(" ")
-        print(f"Perfect. Adding {Fore.GREEN}£{rounded_down_amount_to_delegate}{Fore.RESET} to {category_name}\n")
+        print(f"Perfect. Adding {Fore.GREEN}£{rounded_down_amount_to_delegate}{Fore.RESET} to {category_name}...\n")
         
         initial_category_amount = main.row_values(int(selected_category))[1]
         new_category_amount = float(initial_category_amount) + rounded_down_amount_to_delegate
         main.update_cell(int(selected_category), 2, new_category_amount)
         
         left_to_delegate -= rounded_down_amount_to_delegate
+        time.sleep(2)
+        clear_terminal()
 
     clear_terminal()
     print("----------------------------------\n")
@@ -949,7 +993,39 @@ def build_new_budget():
     """
     Allows the user to input their own categories into the cleared budget
     """
+    categories_entered = 0
+    for i in range(5):
+        print(f"{Fore.RESET}----------------------------------\n")
+        print(f"{Style.BRIGHT}Great! Let's build your budget")
+        print_section_border()
 
+        print(f"{Fore.BLUE}To make things easier later on, you must add at least 5 budget categories right now{Fore.RESET}\n")
+
+        if categories_entered > 0:
+            print("Your budget so far:")
+            print(" ")
+            get_current_budget()
+            print(" ")
+
+        print(f"You have entered {categories_entered} out of 5 required categories\n")
+
+        new_category_name = input(f"{Fore.YELLOW}Type the name of a category to add it\n")
+
+        print(" ")
+        print(f"Adding a {new_category_name} category to your category list...\n")
+        time.sleep(1)
+        print(f"Setting {new_category_name}'s starting amount to £0...")
+        time.sleep(1)
+        new_category_list = [new_category_name, 0]
+        main.append_row(new_category_list)
+        categories_entered += 1
+        clear_terminal()
+        
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}You have added your first 5 categories!")
+    print_section_border()
+    time.sleep(2)
+    clear_terminal()
 
 def startup_prompt():
     """
