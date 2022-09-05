@@ -1020,12 +1020,60 @@ def build_new_budget():
         main.append_row(new_category_list)
         categories_entered += 1
         clear_terminal()
-        
+    
+    add_another_category_intro(categories_entered)
+    
+    
+
+
+def add_another_category_intro(categories_entered):
+    """
+    Allows user to add more than 5 categories during build new budget
+    """
+    category_count = len(main.col_values(1))
     print(f"{Fore.RESET}----------------------------------\n")
-    print(f"{Style.BRIGHT}You have added your first 5 categories!")
+    print(f"{Style.BRIGHT}Great! You have added {category_count} categories to your budget!")
     print_section_border()
-    time.sleep(2)
-    clear_terminal()
+    while True:
+        print(
+"""Would you like to add another budget category?
+1. Yes
+2. No
+"""
+        )
+        end_of_transaction_decision = input("Type 1 or 2\n")
+        if validate_y_n_entry(end_of_transaction_decision):
+            break
+    
+    if end_of_transaction_decision == '1':
+        clear_terminal()
+        print(f"{Fore.RESET}----------------------------------\n")
+        print(f"{Style.BRIGHT}Great! Let's keep building your budget")
+        print_section_border()
+
+        print("Your budget so far:")
+        print(" ")
+        get_current_budget()
+        print(" ")
+
+        print(f"You have entered {category_count} categories so far\n")
+
+        new_category_name = input(f"{Fore.YELLOW}Type the name of a category to add it\n")
+
+        print(" ")
+        print(f"Adding a {new_category_name} category to your category list...\n")
+        time.sleep(1)
+        print(f"Setting {new_category_name}'s starting amount to £0...")
+        time.sleep(1)
+        new_category_list = [new_category_name, 0]
+        main.append_row(new_category_list)
+        clear_terminal()
+        add_another_category_intro(category_count)
+    else:
+        clear_terminal()
+    
+    
+
 
 def startup_prompt():
     """
