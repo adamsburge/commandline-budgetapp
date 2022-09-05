@@ -2,6 +2,7 @@ import gspread
 import os
 import time
 import sys
+import math
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 from colorama import init
@@ -86,7 +87,7 @@ def get_total_budgeted_amount():
     budgeted_amount = main.col_values(2)
     column_list = [float(x) for x in budgeted_amount]
 
-    return sum(column_list)
+    return round(sum(column_list),2) 
 
 
 def get_current_budget():
@@ -116,27 +117,27 @@ def add_paycheck():
     to delegate money to various categories. Then return to the home prompt.
     """
     print("----------------------------------\n")
-    print(f"{Style.BRIGHT}Just a few questions about your paycheck:")
+    print(f"{Style.BRIGHT}Just a few questions about your income transaction:")
     print_section_border()
 
     while True:
-        paycheck = input(f"{Fore.YELLOW}How much is your paycheck?\n")
+        paycheck = input(f"{Fore.YELLOW}How much is the income amount?\n")
         if validate_number_entry(paycheck):
             break
 
     left_to_delegate = float(paycheck)
     print(" ")
     while True:
-        date = input(f"{Fore.YELLOW}When did you receive your paycheck? (DD-MM-YY)\n")
+        date = input(f"{Fore.YELLOW}When did you receive this income? (DD-MM-YY)\n")
         if validate_date_entry(date):
             break
-    print_section_border()
 
     paycheck_transaction = [float(paycheck), "My Employer", date, "Paycheck"]
     append_transaction_row(paycheck_transaction)
 
-    print(" ")
-    print(f"{Style.BRIGHT}Time to delegate the money from this paycheck!\n")
+    clear_terminal()
+    print_section_border()
+    print(f"{Style.BRIGHT}Time to delegate the money from this income!")
     
     while left_to_delegate != 0:
         print_section_border()
@@ -146,6 +147,7 @@ def add_paycheck():
         get_current_budget()
         print(" ")
 
+        left_to_delegate = round(float(left_to_delegate), 2)
         print(f"You have {Fore.GREEN}£{left_to_delegate}{Fore.RESET} left to delegate from your paycheck.\n")
         while True:
             selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to delegate money to:\n")
@@ -160,20 +162,37 @@ def add_paycheck():
                 if validate_delegation_max(amount_to_delegate, left_to_delegate):
                     break
         
+        rounded_down_amount_to_delegate = round(float(amount_to_delegate), 2)
         print(" ")
-        print(f"Perfect. Adding {Fore.GREEN}£{amount_to_delegate}{Fore.RESET} to {category_name}\n")
+        print(f"Perfect. Adding {Fore.GREEN}£{rounded_down_amount_to_delegate}{Fore.RESET} to {category_name}\n")
         
         initial_category_amount = main.row_values(int(selected_category))[1]
-        new_category_amount = float(initial_category_amount) + float(amount_to_delegate)
+        new_category_amount = float(initial_category_amount) + rounded_down_amount_to_delegate
         main.update_cell(int(selected_category), 2, new_category_amount)
         
-        left_to_delegate -= float(amount_to_delegate)
+        left_to_delegate -= rounded_down_amount_to_delegate
 
     clear_terminal()
     print("----------------------------------\n")
-    print("You have delegated all your paycheck! Well done! Taking you back to the main menu.")
+    print("You have delegated all your income transaction! Well done!")
+    print_section_border()
 
-    home_prompt()
+    while True:
+        print(
+"""Would you like to add another income transaction?
+1. Yes
+2. No
+"""
+        )
+        end_of_transaction_decision = input("Type 1 or 2\n")
+        if validate_y_n_entry(end_of_transaction_decision):
+            break
+    if end_of_transaction_decision == '1':
+        clear_terminal()
+        add_transaction()
+    else:
+        clear_terminal()
+        home_prompt()
 
 
 def add_transaction():
@@ -199,7 +218,7 @@ def add_transaction():
         transaction_date = input(f"{Fore.YELLOW}When did you make this payment? (DD-MM-YY)\n")
         if validate_date_entry(transaction_date):
             break
-
+    transaction_amount = round(float(transaction_amount), 2)
     print_section_border()
     print(f"Great! From which category should this {Fore.RED}£{transaction_amount}{Fore.RESET} payment to {transaction_institution} be deducted?\n")
     get_current_budget()
@@ -270,12 +289,14 @@ def redelegate():
     print(f"{from_category_name} has {Fore.GREEN}£{from_category_amount}{Fore.RESET} and {Fore.BLUE}{to_category_name}{Fore.RESET} has {Fore.GREEN}£{to_category_amount}{Fore.RESET}.\n")
 
     while True:
-        transfer_amount_input = input(f"{Fore.YELLOW}How much of {Fore.BLUE}{from_category_name}{Fore.RESET}'s {Fore.GREEN}£{from_category_amount}{Fore.YELLOW} would you like to move to the {Fore.BLUE}{to_category_name}{Fore.RESET} category?\n")
+        transfer_amount_input = input(f"{Fore.YELLOW}How much of {Fore.BLUE}{from_category_name}{Fore.RESET}'s {Fore.GREEN}£{from_category_amount}{Fore.YELLOW} would you like to move to the {Fore.BLUE}{to_category_name}{Fore.YELLOW} category?\n")
         if validate_delegation_max(transfer_amount_input, from_category_amount):
             break        
     
-    print(" ")
+    print(f"{Fore.RESET}")
     print(f"{Fore.RESET}Moving your money...")
+
+    transfer_amount_input = round(float(transfer_amount_input), 2)
 
     new_from_category_amount = float(from_category_amount) - float(transfer_amount_input)
     main.update_cell(int(from_category_input), 2, new_from_category_amount)
@@ -328,7 +349,7 @@ def update_balance():
         if validate_number_entry(bank_balance_input):
             break
 
-    bank_balance = float(bank_balance_input)
+    bank_balance = round(float(bank_balance_input), 2)
     budgeted_amount = float(get_total_budgeted_amount())
 
     print(f"{Fore.RESET}")
@@ -458,10 +479,12 @@ def delete_category():
     main.delete_rows(category_to_delete)
     print_section_border()
 
+    category_to_delete_amount = round(float(category_to_delete_amount), 2)
     print(f"{Fore.BLUE}The {category_to_delete_name} category had {Fore.GREEN}£{category_to_delete_amount}{Fore.BLUE} delegated to it.\n")
     print("You will need to delegate this amount to another category.\n")
     
     while category_to_delete_amount != 0:
+        category_to_delete_amount = round(float(category_to_delete_amount), 2)
         print(f"There is {Fore.GREEN}£{category_to_delete_amount}{Fore.RESET} left to delegate from {category_to_delete_name}. Where do you wish to delegate it?\n")
         while True:
             get_current_budget()
@@ -480,7 +503,7 @@ def delete_category():
             amount_to_delegate_input = input(f"{Fore.YELLOW}How much of the remaining {Fore.GREEN}£{category_to_delete_amount}{Fore.YELLOW} do you wish to put towards {delegation_category_name}?\n")
             if validate_delegation_max(amount_to_delegate_input, category_to_delete_amount):
                 break
-        amount_to_delegate = float(amount_to_delegate_input)
+        amount_to_delegate = round(float(amount_to_delegate_input), 2)
         print(" ")
         print(f"Adding {Fore.GREEN}£{amount_to_delegate}{Fore.RESET} to {delegation_category_name}...")
         new_delegation_category_amount = amount_to_delegate + original_delegation_category_amount
@@ -523,20 +546,21 @@ def update_higher_bank_balance(bank_balance):
     print_section_border()
 
     budgeted_amount = get_total_budgeted_amount()
-    left_to_delegate = bank_balance - budgeted_amount
+    left_to_delegate = round(bank_balance, 2) - round(budgeted_amount, 2)
 
     while left_to_delegate != 0:
         print("Here is how your current budget stands:")
         print(" ")
         get_current_budget()
         print(" ")
-
+        
+        left_to_delegate = round(left_to_delegate, 2)
         print(f"You have {Fore.GREEN}£{left_to_delegate}{Fore.RESET} left to delegate.\n")
         while True:
             selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to delegate money to:\n")
             if validate_category_num_entry(selected_category):
                 break
-        
+
         print(" ")
         category_name = main.row_values(int(selected_category))[0]
         while True:
@@ -544,7 +568,8 @@ def update_higher_bank_balance(bank_balance):
             if validate_number_entry(amount_to_delegate):
                 if validate_delegation_max(amount_to_delegate, left_to_delegate):
                     break
-        
+        amount_to_delegate = round(float(amount_to_delegate), 2)
+
         print(" ")
         print(f"Perfect. Adding {Fore.GREEN}£{amount_to_delegate}{Fore.RESET} to {category_name}\n")
         
@@ -575,7 +600,7 @@ def update_lower_bank_balance(bank_balance):
     print_section_border()
 
     budgeted_amount = get_total_budgeted_amount()
-    left_to_deduct = budgeted_amount - bank_balance
+    left_to_deduct = round(float(budgeted_amount), 2) - round(float(bank_balance), 2)
 
     while left_to_deduct != 0:
         print("Here is how your current budget stands:")
@@ -583,6 +608,7 @@ def update_lower_bank_balance(bank_balance):
         get_current_budget()
         print(" ")
 
+        left_to_deduct = round(float(left_to_deduct), 2)
         print(f"You have {Fore.RED}£{left_to_deduct}{Fore.RESET} left to deduct.\n")
         while True:
             selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to deduct money from:\n")
@@ -596,7 +622,8 @@ def update_lower_bank_balance(bank_balance):
             if validate_number_entry(amount_to_deduct):
                 if validate_delegation_max(amount_to_deduct, left_to_deduct):
                     break
-        
+        amount_to_deduct = round(float(amount_to_deduct), 2)
+
         print(" ")
         print(f"Deducting {Fore.RED}£{amount_to_deduct}{Fore.RESET} from {category_name}\n")
         
@@ -634,7 +661,7 @@ def validate_number_entry(value):
     Validate entries that need a number
     """
     try:
-        if float(value) < 1:
+        if float(value) < .01:
             raise ValueError(f"You must enter a {Fore.BLUE}number greater than 1{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
         print(" ")
