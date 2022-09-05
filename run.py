@@ -123,15 +123,18 @@ def add_paycheck():
         paycheck = input(f"{Fore.YELLOW}How much is the income amount?\n")
         if validate_number_entry(paycheck):
             break
-
     left_to_delegate = float(paycheck)
+
+    print(" ")
+    transaction_institution = input(f"{Fore.YELLOW}Who or what institution gave you this income?\n")
+
     print(" ")
     while True:
         date = input(f"{Fore.YELLOW}When did you receive this income? (DD-MM-YY)\n")
         if validate_date_entry(date):
             break
 
-    paycheck_transaction = [float(paycheck), "My Employer", date, "Paycheck"]
+    paycheck_transaction = [float(paycheck), transaction_institution, date, "Income"]
     append_transaction_row(paycheck_transaction)
 
     clear_terminal()
