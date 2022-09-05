@@ -333,9 +333,9 @@ def update_balance():
 
     print(f"{Fore.RESET}")
     if bank_balance > budgeted_amount:
-        update_higher_bank_balance()
+        update_higher_bank_balance(bank_balance)
     else:
-        update_lower_bank_balance()
+        update_lower_bank_balance(bank_balance)
 
 
 def adjust_categories():
@@ -510,22 +510,70 @@ Would you like to adjust another category?
         home_prompt()  
 
 
-def update_higher_bank_balance():
+def update_higher_bank_balance(bank_balance):
     """
     Tells the user their bank balance is higher than their budget
     Then calculates how much money they have to delegate to make 
     their budgeted amount equal that of their bank account
     """
-    print("this will prompt the user to delegate money")
+    clear_terminal()
+    print("----------------------------------\n")
+    print(f"{Style.BRIGHT}Your bank balance is higher than your budgeted amount.")
+    print(f"{Style.BRIGHT}To fix this, you will need to delegate money to your budget.")
+    print_section_border()
+
+    budgeted_amount = get_total_budgeted_amount()
+    left_to_delegate = bank_balance - budgeted_amount
+
+    while left_to_delegate != 0:
+        print("Here is how your current budget stands:")
+        print(" ")
+        get_current_budget()
+        print(" ")
+
+        print(f"You have {Fore.GREEN}£{left_to_delegate}{Fore.RESET} left to delegate.\n")
+        while True:
+            selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to delegate money to:\n")
+            if validate_category_num_entry(selected_category):
+                break
+        
+        print(" ")
+        category_name = main.row_values(int(selected_category))[0]
+        while True:
+            amount_to_delegate = input(f"{Fore.YELLOW}How much would you like to put towards {category_name}?\n")
+            if validate_number_entry(amount_to_delegate):
+                if validate_delegation_max(amount_to_delegate, left_to_delegate):
+                    break
+        
+        print(" ")
+        print(f"Perfect. Adding {Fore.GREEN}£{amount_to_delegate}{Fore.RESET} to {category_name}\n")
+        
+        initial_category_amount = main.row_values(int(selected_category))[1]
+        new_category_amount = float(initial_category_amount) + float(amount_to_delegate)
+        main.update_cell(int(selected_category), 2, new_category_amount)
+        
+        left_to_delegate -= float(amount_to_delegate)
+    
+    clear_terminal()
+    print("----------------------------------\n")
+    print("Sucess! You've finished delegating and your bank balance now matches the budget")
+    print_section_border()
+    time.sleep(2.5)
+    clear_terminal()
 
 
-def update_lower_bank_balance():
+
+def update_lower_bank_balance(bank_balance):
     """
     Tells the user their bank balance is lower than their budget
     Then prompts them to withdraw money from their budget in order
     to make their budgeted amount equal to that of their bank account
     """
-    print("This will prompt the user deduct money")
+    clear_terminal()
+    print("----------------------------------\n")
+    print(f"{Style.BRIGHT}Your bank balance is lower than your budgeted amount")
+    print_section_border()
+    print(f"The bank balance is {bank_balance}")
 
 
 def validate_home_data(value):
