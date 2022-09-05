@@ -490,10 +490,10 @@ def validate_home_data(value):
     """
     try:
         if int(value) > 7:
-            raise ValueError(f"You must enter a number between 1 and 5. You entered {value}")
+            raise ValueError(f"You must enter a {Fore.BLUE}number{Fore.RESET} between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}5{Fore.RESET}. You entered {Fore.RED}{value}")
     except ValueError as e:
         print(" ")
-        print(f"Invalid entry: {e}, please type a number.\n")
+        print(f"Invalid entry: {Fore.RED}{e}{Fore.RESET}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
         return False
     return True
 
@@ -504,9 +504,10 @@ def validate_number_entry(value):
     """
     try:
         if float(value) < 1:
-            raise ValueError(f"You must enter a number greater than 1. You entered {value}")
+            raise ValueError(f"You must enter a {Fore.BLUE}number greater than 1{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
-        print(f"Invalid entry: {e}, please type a number.")
+        print(" ")
+        print(f"Invalid entry: {Fore.RED}{e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
         return False
     return True
 
@@ -518,9 +519,10 @@ def validate_category_num_entry(value):
     entry_amount = len(main.col_values(1))
     try:
         if int(value) > int(entry_amount):
-            raise ValueError(f"You must enter a number between 1 and {entry_amount}. You entered {value}")
+            raise ValueError(f"You must enter a {Fore.BLUE}number{Fore.RESET} between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}{entry_amount}{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
-        print(f"Invalid entry: {e}, please type a number.")
+        print(" ")
+        print(f"Invalid entry: {Fore.RED}{e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
         return False
     return True
 
@@ -533,9 +535,10 @@ def validate_delegation_max(value, max):
     """
     try:
         if float(value) > float(max):
-            raise ValueError(f"You must enter a number between 1 and {max}. You entered {value}")
+            raise ValueError(f"You must enter a {Fore.BLUE}number{Fore.RESET} between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}{max}{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
-        print(f"Invalid entry: {e}, please type a number.")
+        print(" ")
+        print(f"Invalid entry: {Fore.RED}{e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
         return False
     return True
 
@@ -549,8 +552,8 @@ def validate_date_entry(value):
             raise ValueError
         return True
     except ValueError:
-        print("")
-        print(f"{value} is not formated properly.\n")
+        print(" ")
+        print(f"{Fore.RED}{value}{Fore.RESET} is not formated properly.\n")
         return False
 
 
@@ -560,9 +563,10 @@ def validate_y_n_entry(value):
     """
     try:
         if int(value) > 2:
-            raise ValueError(f"You must enter either 1 or 2. You entered {value}")
+            raise ValueError(f"You must enter either {Fore.BLUE}1{Fore.RESET} or {Fore.BLUE}2{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
-        print(f"Invalid entry: {e}, please type a number.")
+        print(" ")
+        print(f"Invalid entry: {Fore.RED}{e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
         return False
     return True
 
@@ -573,9 +577,10 @@ def validate_transaction_list_num_entry(value, max):
     """
     try:
         if int(value) > int(max):
-            raise ValueError(f"You must enter a number between 1 and {max}. You entered {value}\n")
+            raise ValueError(f"You must enter a {Fore.BLUE}number{Fore.RESET} between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}{max}{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}\n")
     except ValueError as e:
-        print(f"Invalid entry: {e}, please type a number.")
+        print(" ")
+        print(f"Invalid entry: {Fore.RED}{e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
         return False
     return True
 
