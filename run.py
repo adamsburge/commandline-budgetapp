@@ -40,15 +40,17 @@ def home_prompt():
     print(f"{Fore.YELLOW}What would you like to do?")
     print(
     """
-    1. Add a Paycheck
-    2. Add a Transaction
-    3. Adjust Categories
-    4. View Recent Transactions
-    5. I'm done budgeting
+    1. Add an Income Transaction
+    2. Add a Payment Transaction
+    3. Redelegate/Move Money Around
+    4. My Bank Balance Doesn't Match the Budgeted Amount
+    5. Add or Delete Categories
+    6. View Recent Transactions
+    7. I'm done budgeting
     """
     )
     while True:
-        action = input(f"{Fore.YELLOW}Type the number of the action you would like to perform:\n")
+        action = input(f"{Fore.YELLOW}Type the number of the action you would like to perform:\n{Fore.RESET}")
         if validate_home_data(action):
             print(" ")
             print("One second while we get things ready...")
@@ -60,12 +62,22 @@ def home_prompt():
     elif int(action) == 2:
         add_transaction()
     elif int(action) == 3:
-        adjust_categories()
+        print("This will redelegate!")
+        home_prompt()
     elif int(action) == 4:
+        print("This will adjust the budgeted amount!")
+        home_prompt()
+    elif int(action) == 5:
+        adjust_categories()
+    elif int(action) == 6:
         view_recent_transactions()
     else:
-        print("Thanks for budgeting! Exiting the Application...")
+        print("----------------------------------\n")
         print(" ")
+        print(f"{Style.BRIGHT}Thanks for budgeting! Exiting the Application...")
+        print(" ")
+        print(" ")
+        print("----------------------------------")
 
 
 def get_total_budgeted_amount():
@@ -405,10 +417,11 @@ def validate_home_data(value):
     Validates the user input from the home page. 
     """
     try:
-        if int(value) > 5:
+        if int(value) > 7:
             raise ValueError(f"You must enter a number between 1 and 5. You entered {value}")
     except ValueError as e:
-        print(f"Invalid entry: {e}, please type a number.")
+        print(" ")
+        print(f"Invalid entry: {e}, please type a number.\n")
         return False
     return True
 
@@ -529,7 +542,7 @@ def txt_effect(text_to_print):
     for character in text_to_print:
         sys.stdout.write(character)
         sys.stdout.flush()
-        time.sleep(0.04)
+        time.sleep(0.03)
 
 
 txt_effect("----------------------------------\n")
@@ -537,6 +550,6 @@ print(" ")
 txt_effect("Welcome to Commandline BudgetApp\n")
 print(" ")
 txt_effect("----------------------------------\n")
-time.sleep(2)
+time.sleep(1.7)
 clear_terminal()
 home_prompt()
