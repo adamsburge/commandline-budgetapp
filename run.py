@@ -772,7 +772,7 @@ def validate_y_n_entry(value):
     Validates any inputs which require yes or no answers
     """
     try:
-        if int(value) > 2:
+        if value not in ["1", "2"]:
             raise ValueError(f"You must enter either {Fore.BLUE}1{Fore.RESET} or {Fore.BLUE}2{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
         print(" ")
