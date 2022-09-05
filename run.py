@@ -64,7 +64,7 @@ def home_prompt():
     elif int(action) == 3:
         redelegate()
     elif int(action) == 4:
-        print("This will adjust the budgeted amount!")
+        update_balance()
         home_prompt()
     elif int(action) == 5:
         adjust_categories()
@@ -312,6 +312,32 @@ def redelegate():
         clear_terminal()
         home_prompt()
 
+
+def update_balance():
+    """
+    Allows the user to input their current bank balance 
+    then prompts them to redelegate or add money so that 
+    the budget matches their bank balance.
+    """
+    print("----------------------------------\n")
+    print(f"{Style.BRIGHT}Let's get your budget up to date")
+    print_section_border()
+
+    while True:
+        bank_balance_input = input(f"{Fore.YELLOW}What is your current bank balance?\n")
+        if validate_number_entry(bank_balance_input):
+            break
+
+    bank_balance = float(bank_balance_input)
+    budgeted_amount = float(get_total_budgeted_amount())
+
+    print(f"{Fore.RESET}")
+    if bank_balance > budgeted_amount:
+        update_higher_bank_balance()
+    else:
+        update_lower_bank_balance()
+
+
 def adjust_categories():
     """
     Lets the user select to either add or delete a category
@@ -482,6 +508,24 @@ Would you like to adjust another category?
     else:
         clear_terminal()
         home_prompt()  
+
+
+def update_higher_bank_balance():
+    """
+    Tells the user their bank balance is higher than their budget
+    Then calculates how much money they have to delegate to make 
+    their budgeted amount equal that of their bank account
+    """
+    print("this will prompt the user to delegate money")
+
+
+def update_lower_bank_balance():
+    """
+    Tells the user their bank balance is lower than their budget
+    Then prompts them to withdraw money from their budget in order
+    to make their budgeted amount equal to that of their bank account
+    """
+    print("This will prompt the user deduct money")
 
 
 def validate_home_data(value):
