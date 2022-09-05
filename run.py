@@ -572,8 +572,48 @@ def update_lower_bank_balance(bank_balance):
     clear_terminal()
     print("----------------------------------\n")
     print(f"{Style.BRIGHT}Your bank balance is lower than your budgeted amount")
+    print(f"{Style.BRIGHT}To fix this, you will need to deduct money from your budgeted categories")
     print_section_border()
-    print(f"The bank balance is {bank_balance}")
+
+    budgeted_amount = get_total_budgeted_amount()
+    left_to_deduct = budgeted_amount - bank_balance
+
+    while left_to_deduct != 0:
+        print("Here is how your current budget stands:")
+        print(" ")
+        get_current_budget()
+        print(" ")
+
+        print(f"You have {Fore.RED}£{left_to_deduct}{Fore.RESET} left to deduct.\n")
+        while True:
+            selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to deduct money from:\n")
+            if validate_category_num_entry(selected_category):
+                break
+        
+        print(" ")
+        category_name = main.row_values(int(selected_category))[0]
+        while True:
+            amount_to_deduct = input(f"{Fore.YELLOW}How much would you like to deduct from {category_name}?\n")
+            if validate_number_entry(amount_to_deduct):
+                if validate_delegation_max(amount_to_deduct, left_to_deduct):
+                    break
+        
+        print(" ")
+        print(f"Deducting {Fore.RED}£{amount_to_deduct}{Fore.RESET} from {category_name}\n")
+        
+        initial_category_amount = main.row_values(int(selected_category))[1]
+        new_category_amount = float(initial_category_amount) - float(amount_to_deduct)
+        main.update_cell(int(selected_category), 2, new_category_amount)
+        
+        left_to_deduct -= float(amount_to_deduct)
+    
+    clear_terminal()
+    print("----------------------------------\n")
+    print("Sucess! You've finished deducting money from your categories")
+    print("and your bank balance now matches the budget")
+    print_section_border()
+    time.sleep(2.5)
+    clear_terminal()
 
 
 def validate_home_data(value):
