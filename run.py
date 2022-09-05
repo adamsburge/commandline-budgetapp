@@ -62,8 +62,7 @@ def home_prompt():
     elif int(action) == 2:
         add_transaction()
     elif int(action) == 3:
-        print("This will redelegate!")
-        home_prompt()
+        redelegate()
     elif int(action) == 4:
         print("This will adjust the budgeted amount!")
         home_prompt()
@@ -182,7 +181,7 @@ def add_transaction():
     Receives new transaction information, deducts money from appropriate
     budget categories, adds transaction to transaction list.
     """
-    print_section_border()
+    print("----------------------------------\n")
     print(f"{Style.BRIGHT}Just a few questions about your transaction:")
     print_section_border()
 
@@ -238,6 +237,62 @@ def add_transaction():
     else:
         clear_terminal()
         home_prompt()
+
+
+def redelegate():
+    """
+    Allows the user to move money between the various budgeted categories
+    """
+    print("----------------------------------\n")
+    print(f"{Style.BRIGHT}Let's redelegate your money")
+    print_section_border()
+
+    print("Here is how your current budget stands:\n")
+    get_current_budget()
+    print(" ")
+
+    while True:
+        from_category_input = input(f"{Fore.YELLOW}Type the number of the category you wish to move money from:\n")
+        if validate_category_num_entry(from_category_input):
+            break
+    from_category_name = main.row_values(int(from_category_input))[0]
+    from_category_amount = main.row_values(int(from_category_input))[1]
+
+    while True:
+        print(" ")
+        to_category_input = input(f"{Fore.YELLOW}Type the number of the category you wish to move money from {from_category_name} towards:\n")
+        if validate_category_num_entry(to_category_input):
+            break
+    to_category_name = main.row_values(int(to_category_input))[0]
+    to_category_amount = main.row_values(int(to_category_input))[1]
+
+    print(" ")
+    print(f"{from_category_name} has {Fore.GREEN}£{from_category_amount}{Fore.RESET} and {to_category_name} has {Fore.GREEN}£{to_category_amount}{Fore.RESET}.\n")
+
+    while True:
+        transfer_amount_input = input(f"{Fore.YELLOW}How much of {from_category_name}'s {Fore.GREEN}£{from_category_amount}{Fore.YELLOW} would you like to move to the {to_category_name} category?\n")
+        if validate_delegation_max(transfer_amount_input, from_category_amount):
+            break        
+    
+    print(" ")
+    print(f"{Fore.RESET}Moving your money...")
+
+    new_from_category_amount = float(from_category_amount) - float(transfer_amount_input)
+    main.update_cell(int(from_category_input), 2, new_from_category_amount)
+
+    new_to_category_amount = float(to_category_amount) + float(transfer_amount_input)
+    main.update_cell(int(to_category_input), 2, new_to_category_amount)
+    
+    time.sleep(.7)
+    clear_terminal()
+
+    print("----------------------------------\n")
+    print(f"{Style.BRIGHT}Success!\n")
+    print(f"{Style.NORMAL}{Fore.BLUE}{from_category_name}{Fore.RESET} now has {Fore.GREEN}£{new_from_category_amount}{Fore.RESET}")
+    print(f"{Style.NORMAL}{Fore.BLUE}{to_category_name}{Fore.RESET} now has {Fore.GREEN}£{new_to_category_amount}{Fore.RESET}")
+    print_section_border()
+
+    get_current_budget()
 
 
 def adjust_categories():
