@@ -291,6 +291,14 @@ def delete_account():
             print(f"{Fore.RESET}")
             print("Sorry, there's no account with that username or email")
             print(" ")
+            time.sleep(2)
+            clear_terminal()
+            print(f"{Fore.RESET}----------------------------------\n")
+            print(
+                f"{Style.BRIGHT}Redirecting you back to the start page...")
+            print_section_border()
+            time.sleep(2)
+            startup_prompt()
         else:
             break
 
@@ -306,8 +314,9 @@ def delete_account():
             print(f"{Fore.RESET} ")
             print("Sorry, that password is incorrect")
 
-    category_worksheet_name = username + "_"
-    transaction_name = username + "_"
+    username_text = users_sheet.row_values(username_row)[2]
+    category_worksheet_name = username_text + "_"
+    transaction_name = username_text + "_"
     category_worksheet = SHEET.worksheet(category_worksheet_name + 'main')
     transactions_worksheet = SHEET.worksheet(transaction_name + 'transactions')
 
@@ -895,8 +904,8 @@ def redelegate(category_worksheet, transactions_worksheet):
         if validate_category_num_entry(from_category_input,
                                        category_worksheet):
             if int(selected_category_amount) <= 0:
-                    print(" ")
-                    print("That category has £0. Select another category.\n")
+                print(" ")
+                print("That category has £0. Select another category.\n")
             else:
                 break
     from_category_name = category_worksheet.row_values(
