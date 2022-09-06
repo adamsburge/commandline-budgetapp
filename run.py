@@ -2,6 +2,7 @@ import gspread
 import os
 import time
 import sys
+import re
 from google.oauth2.service_account import Credentials
 from datetime import datetime, date
 from colorama import init
@@ -843,10 +844,11 @@ def startup_view():
     txt_effect("----------------------------------\n")
     time.sleep(1.7)
 
-def set_up_new_budget():
+def set_up_new_budget(username):
     """
     Guides the user through a process to set up a new budget
     """
+    clear_terminal()
     print(f"{Fore.RESET}----------------------------------\n")
     print(f"{Style.BRIGHT}Let's get your new budget set up")
     print_section_border()
@@ -879,30 +881,35 @@ def set_up_new_budget():
         preset_or_build = input(f"{Fore.YELLOW}Type 1 or 2\n")
         if validate_y_n_entry(preset_or_build):
             break
+    
+    SHEET.add_worksheet(username + "_main", 1, 2)
+    SHEET.add_worksheet(username + "_transactions", 1, 4)
+    category_worksheet_name = username + "_"
+    transaction_name = username + "_"
+    category_worksheet = SHEET.worksheet(category_worksheet_name + 'main')
+    transactions_worksheet = SHEET.worksheet(transaction_name + 'transactions')
+    transactions_worksheet.update_acell('A1', 'amount')
+    transactions_worksheet.update_acell('B1', 'insitution')
+    transactions_worksheet.update_acell('C1', 'date')
+    transactions_worksheet.update_acell('D1', 'budget category')
+    
     if preset_or_build == '1':
         clear_terminal()
         print(f"{Fore.RESET}----------------------------------\n")
         print(f"{Style.BRIGHT}Setting up your budget...")
         print_section_border()
         time.sleep(2)
-        category_worksheet.clear()
-        num_of_rows = int(transactions_worksheet.row_count)
-        if num_of_rows > 1:
-            transactions_worksheet.delete_rows(2, num_of_rows)
         clear_terminal()
-        set_up_preset_budget()
-        add_money_to_new_budget()
+
+        set_up_preset_budget(category_worksheet, transactions_worksheet)
+        add_money_to_new_budget(category_worksheet, transactions_worksheet)
     else:
-        category_worksheet.clear()
-        num_of_rows = int(transactions_worksheet.row_count)
-        if num_of_rows > 1:
-            transactions_worksheet.delete_rows(2, num_of_rows)
         clear_terminal()
-        build_new_budget()
-        add_money_to_new_budget()
+        build_new_budget(category_worksheet, transactions_worksheet)
+        add_money_to_new_budget(category_worksheet, transactions_worksheet)
 
 
-def set_up_preset_budget():
+def set_up_preset_budget(category_worksheet, transactions_worksheet):
     """
     Fills the budget spreadsheet with preset data
     """
@@ -910,7 +917,7 @@ def set_up_preset_budget():
     category_worksheet.append_rows(preset_categories)
 
 
-def add_money_to_new_budget():
+def add_money_to_new_budget(category_worksheet, transactions_worksheet):
     """
     Prompts the user to input their bank balance and then delegate money
     """
@@ -988,7 +995,7 @@ def add_money_to_new_budget():
     clear_terminal()
     home_prompt(category_worksheet, transactions_worksheet)
 
-def build_new_budget():
+def build_new_budget(category_worksheet, transactions_worksheet):
     """
     Allows the user to input their own categories into the cleared budget
     """
@@ -1080,8 +1087,48 @@ def create_account():
     print(f"{Style.BRIGHT}Let's get your account set up")
     print_section_border()
 
+    first_name = input(f"{Fore.YELLOW}What is your first name?\n").capitalize()
+    print(" ")
+    
+    while True:
+        email = input(f"{Fore.YELLOW}Enter your email address:\n")
+        regex_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        if(re.fullmatch(regex_email, email)):
+            break
+        else:
+            print(" ")
+            print("Invalid Email\n")
+    
+    while True:
+        print(" ")
+        new_username = input(f"{Fore.YELLOW}Now enter a username. Make sure it does not have any spaces:\n")
+        if (" " in new_username):
+            print(f"{Fore.RESET}")
+            print("Your username had a space in it. Try again without spaces.")
+        else:
+            break
+    
+    while True:
+        print(" ")
+        password_entry_1 = input(f"{Fore.YELLOW}Now enter a password that you will be sure to remember\n")
+        print(" ")
+        password_entry_2 = input(f"{Fore.YELLOW}Retype that password:\n")
+        if password_entry_1 == password_entry_2:
+            break
+        else:
+            print(f"{Fore.RESET}")
+            print("Your passwords do not match. Try again.")
+    
+    new_user_info = [first_name, email, new_username, password_entry_2]
+    users_sheet.append_row(new_user_info)
 
+    clear_terminal()
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Setting up your account...")
+    print_section_border()
+    time.sleep(2)
 
+    return new_username
 
 def startup_prompt():
     """
@@ -1172,8 +1219,8 @@ Would you like to create an account?
         home_prompt(category_worksheet, transactions_worksheet)
     else:
         clear_terminal()
-        create_account()
-        set_up_new_budget()
+        get_username = create_account()
+        set_up_new_budget(get_username)
 
 # username = input("Type your username:\n")
 # category_worksheet_name = username + "_"
