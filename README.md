@@ -1,31 +1,44 @@
-![CI logo](https://codeinstitute.s3.amazonaws.com/fullstack/ci_logo_small.png)
+# Welcome to Commandline BudgetApp
 
-Welcome adamsburge,
+![Am I Responsive Screenshot](assets/images/am_i_responsive.png)
 
-This is the Code Institute student template for deploying your third portfolio project, the Python command-line project. The last update to this file was: **August 17, 2021**
+Commandline BudgetApp is a simple bugdeting app which operates in a terminal. The app allows users to create an account, set up a budget and keep track of their money through an easy to use budgeting portal. The impetus for this app was my own frustration with all current budgeting apps either being too complicated (and thus, discouraging to use) or trying to incorporate other aspects of my finances which I would like to control separately (such as investing). Consequently, Commandline BudgetApp focuses solely on keeping track of expenses and helping you delegate money. 
 
-## Reminders
+Using the app is simple, as the user simply needs to 1.) make sure that the total budgetd amount is equivalent to that of their bank balance, 2.) log each income and payment transaction, and 3.) follow the app's prompts and questions.
 
-* Your code must be placed in the `run.py` file
-* Your dependencies must be placed in the `requirements.txt` file
-* Do not edit any of the other files or your code may not deploy properly
+Additional features include: allowing the user to create an account which they can log back into at any point, allowing the user to delete their account if they wish and allowing users to opt for a prebuilt budget or build their own. Once the user has created their budget, they can input transactions, move money around their budget, view recent transactions, add or delete budget categories and update their budget to match their bank account balance. It is hoped that this app provides a simple solution to keeping track of the user's finances.
 
-## Creating the Heroku app
+# Features
 
-When you create the app, you will need to add two buildpacks from the _Settings_ tab. The ordering is as follows:
+## Start Screen
+![Start Screen](assets/images/start_screen.png)
 
-1. `heroku/python`
-2. `heroku/nodejs`
+### Login
 
-You must then create a _Config Var_ called `PORT`. Set this to `8000`
+### Create Account
+![Create Account](assets/images/create_account.png)
 
-If you have credentials, such as in the Love Sandwiches project, you must create another _Config Var_ called `CREDS` and paste the JSON into the value field.
+#### Setup Budget
+![Setup Budget](assets/images/create_budget.png)
 
-Connect your GitHub repository and deploy as normal.
+### Delete Account
 
-## Constraints
+### Quit App
+![Quit Screen](assets/images/quit_screen.png)
 
-The deployment terminal is set to 80 columns by 24 rows. That means that each line of text needs to be 80 characters or less otherwise it will be wrapped onto a second line.
+## Home Dashboard
+![Home Dashboard](assets/images/home_dashboard.png)
 
------
-Happy coding!
+### Add Income Transaction
+
+### Add Payment Transaction
+
+### Redelegate 
+
+### View Recent Transactions
+
+### Add or Delete Categories
+
+### Log Out
+
+## Future Features
