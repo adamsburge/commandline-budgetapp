@@ -1090,11 +1090,36 @@ def create_account():
     first_name = input(f"{Fore.YELLOW}What is your first name?\n").capitalize()
     print(" ")
     
+    emails_list = users_sheet.col_values(2)
+
     while True:
         email = input(f"{Fore.YELLOW}Enter your email address:\n")
         regex_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
         if(re.fullmatch(regex_email, email)):
-            break
+            if email in emails_list:
+                print(" ")
+                print("That email already exists")
+                print(
+    """
+Would you like to log in?
+
+1. Yes
+2. No
+"""
+        )
+                while True:
+                    email_fail = input(f"{Fore.YELLOW}Type 1 or 2\n")
+                    print(" ")
+                    if email_fail in ["1"]:
+                        clear_terminal()
+                        log_in()
+                    elif email_fail in ["2"]:
+                        break
+                    else:
+                        print(" ")
+                        print("Please type either 1 or 2")
+            else:
+                break
         else:
             print(" ")
             print("Invalid Email\n")
@@ -1130,6 +1155,80 @@ def create_account():
 
     return new_username
 
+
+def log_in():
+    """
+    Allows user to log in
+    """
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Log In")
+    print_section_border()
+
+    emails_list = users_sheet.col_values(2)
+    usernames_list = users_sheet.col_values(3)
+    usernames_email_list = emails_list + usernames_list
+
+    while True:
+        username = input(f"{Fore.YELLOW}Enter your username or email:\n")
+        if username not in usernames_email_list:
+            print(f"{Fore.RESET}")
+            print("Sorry, there's no account with that username or email")
+            print(" ")
+        else:
+            break
+
+    username_row = users_sheet.find(username).row
+    user_first_name = users_sheet.row_values(username_row)[0]
+
+    while_count = 0
+    while True:
+        print(" ")
+        password = input(f"{Fore.YELLOW}Enter your password:\n")
+
+        if password == users_sheet.row_values(username_row)[3]:
+            break
+        else:
+            print(f"{Fore.RESET} ")
+            print("Sorry, that password is incorrect")
+            while_count += 1
+            if while_count == 3:
+                clear_terminal()
+                print(f"{Fore.RESET}----------------------------------\n")
+                print(f"{Style.BRIGHT}Log In")
+                print_section_border()
+                print("You have failed to log in 3 times\n")
+                print(
+"""
+Would you like to create an account?
+
+1. Yes
+2. No, I'll try my password again
+"""
+    )
+                while True:
+                    password_fail = input(f"{Fore.YELLOW}Type 1 or 2\n")
+                    if validate_y_n_entry(password_fail):
+                        break
+                    if password_fail == 1:
+                        print("Let's create your account")
+
+
+    category_worksheet_name = username + "_"
+    transaction_name = username + "_"
+    category_worksheet = SHEET.worksheet(category_worksheet_name + 'main')
+    transactions_worksheet = SHEET.worksheet(transaction_name + 'transactions')
+    time.sleep(1)
+
+    clear_terminal()
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Welcome Back, {user_first_name}. Retrieving your Budget...")
+    print_section_border()
+    time.sleep(2)
+    clear_terminal()
+
+    home_prompt(category_worksheet, transactions_worksheet)    
+
+
 def startup_prompt():
     """
     Function called at the launch of the program.
@@ -1151,72 +1250,8 @@ What would you like to do?
             break
     if keep_or_start == '1':
         clear_terminal()
-        print(f"{Fore.RESET}----------------------------------\n")
-        print(f"{Style.BRIGHT}Log In")
-        print_section_border()
-
-        emails_list = users_sheet.col_values(2)
-        usernames_list = users_sheet.col_values(3)
-        usernames_email_list = emails_list + usernames_list
-
-        while True:
-            username = input(f"{Fore.YELLOW}Enter your username or email:\n")
-            if username not in usernames_email_list:
-                print(f"{Fore.RESET}")
-                print("Sorry, there's no account with that username or email")
-                print(" ")
-            else:
-                break
-
-        username_row = users_sheet.find(username).row
-        user_first_name = users_sheet.row_values(username_row)[0]
-
-        while_count = 0
-        while True:
-            print(" ")
-            password = input(f"{Fore.YELLOW}Enter your password:\n")
-
-            if password == users_sheet.row_values(username_row)[3]:
-                break
-            else:
-                print(f"{Fore.RESET} ")
-                print("Sorry, that password is incorrect")
-                while_count += 1
-                if while_count == 3:
-                    clear_terminal()
-                    print(f"{Fore.RESET}----------------------------------\n")
-                    print(f"{Style.BRIGHT}Log In")
-                    print_section_border()
-                    print("You have failed to log in 3 times\n")
-                    print(
-    """
-Would you like to create an account?
-
-1. Yes
-2. No, I'll try my password again
-"""
-        )
-                    while True:
-                        password_fail = input(f"{Fore.YELLOW}Type 1 or 2\n")
-                        if validate_y_n_entry(password_fail):
-                            break
-                        if password_fail == 1:
-                            print("Let's create your account")
-
-
-        category_worksheet_name = username + "_"
-        transaction_name = username + "_"
-        category_worksheet = SHEET.worksheet(category_worksheet_name + 'main')
-        transactions_worksheet = SHEET.worksheet(transaction_name + 'transactions')
-        time.sleep(1)
-
-        clear_terminal()
-        print(f"{Fore.RESET}----------------------------------\n")
-        print(f"{Style.BRIGHT}Welcome Back, {user_first_name}. Retrieving your Budget...")
-        print_section_border()
-        time.sleep(2)
-        clear_terminal()
-        home_prompt(category_worksheet, transactions_worksheet)
+        log_in()
+        
     else:
         clear_terminal()
         get_username = create_account()
