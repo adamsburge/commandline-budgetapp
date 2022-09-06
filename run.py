@@ -796,6 +796,18 @@ def add_transaction(category_worksheet, transactions_worksheet):
     while True:
         transaction = input(f"{Fore.YELLOW}How much is the transaction?\n")
         if validate_number_entry(transaction):
+            max_transaction = get_total_budgeted_amount(category_worksheet)
+            if int(transaction) > int(max_transaction):
+                clear_terminal()
+                print(f"{Fore.RESET}----------------------------------\n")
+                print("You don't have enough money for this transaction\n")
+                print(
+                    "Please adjust your balance or add an income "
+                    "transaction")
+                print_section_border()
+                time.sleep(4)
+                clear_terminal()
+                home_prompt(category_worksheet, transactions_worksheet)
             break
     transaction_amount = float(transaction)
     print(" ")
