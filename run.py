@@ -1533,6 +1533,8 @@ def validate_transaction_list_num_entry(value, max):
                 f"between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}"
                 f"{max}{Fore.RESET}. You entered {Fore.RED}"
                 f"{value}{Fore.RESET}\n")
+        elif int(value) <= 0:
+            raise ValueError("You must input a number greater than 0")
     except ValueError as e:
         print(" ")
         print(f"Invalid entry: {e}.\n")
