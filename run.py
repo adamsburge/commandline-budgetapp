@@ -20,22 +20,21 @@ SCOPED_CREDS = CREDS.with_scopes(SCOPE)
 GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
 SHEET = GSPREAD_CLIENT.open('commandline-budgetapp')
 
-main = SHEET.worksheet('main')
-transactions = SHEET.worksheet('transactions')
+users_sheet = SHEET.worksheet('users')
 
 
-def home_prompt():
+def home_prompt(category_worksheet, transactions_worksheet):
     """
     Print the current budget details and 
     ask user which action they would like to perform
     """    
-    print("----------------------------------\n")
+    print(f"{Fore.RESET}----------------------------------\n")
     print(f"{Style.BRIGHT}Commandline BudgetApp Dashboard")
     print_section_border()
-    total_budgeted = get_total_budgeted_amount()
+    total_budgeted = get_total_budgeted_amount(category_worksheet)
     print(f"Your current budgeted amount is {Fore.GREEN} £{total_budgeted} \n")
     print("Current Budget\n")
-    get_current_budget()
+    get_current_budget(category_worksheet)
     print("")
     print(f"{Fore.YELLOW}What would you like to do?")
     print(
@@ -58,15 +57,15 @@ def home_prompt():
             break
     
     if int(action) == 1:
-        add_paycheck()
+        add_paycheck(category_worksheet, transactions_worksheet)
     elif int(action) == 2:
-        add_transaction()
+        add_transaction(category_worksheet, transactions_worksheet)
     elif int(action) == 3:
-        redelegate()
+        redelegate(category_worksheet, transactions_worksheet)
     elif int(action) == 4:
-        view_recent_transactions()
+        view_recent_transactions(category_worksheet, transactions_worksheet)
     elif int(action) == 5:
-        adjust_categories()
+        adjust_categories(category_worksheet, transactions_worksheet)
     elif int(action) == 6:
         clear_terminal()
         print("----------------------------------\n")
@@ -74,8 +73,8 @@ def home_prompt():
         print_section_border()
         time.sleep(2)
         clear_terminal()
-        update_balance()
-        home_prompt()
+        update_balance(category_worksheet)
+        home_prompt(category_worksheet, transactions_worksheet)
     else:
         print("----------------------------------\n")
         print(" ")
@@ -85,23 +84,23 @@ def home_prompt():
         print("----------------------------------")
 
 
-def get_total_budgeted_amount():
+def get_total_budgeted_amount(category_worksheet):
     """
     Calculates the total budgeted amount from the budget
     """
-    budgeted_amount = main.col_values(2)
+    budgeted_amount = category_worksheet.col_values(2)
     column_list = [float(x) for x in budgeted_amount]
 
     return round(sum(column_list),2) 
 
 
-def get_current_budget():
+def get_current_budget(category_worksheet):
     """
     Gets the values of the categories and their budgeted amounts,
     then prints these values in a comprehensible way for the user.
     """
-    categories = main.col_values(1)
-    amount = main.col_values(2)
+    categories = category_worksheet.col_values(1)
+    amount = category_worksheet.col_values(2)
 
     budget_list = {category: amount for category, amount in zip(categories, amount)}
     category_num = 1
@@ -116,7 +115,7 @@ def get_current_budget():
         category_num += 1
 
 
-def add_paycheck():
+def add_paycheck(category_worksheet, transactions_worksheet):
     """
     Receive Paycheck information, validate entries and, if valid, allow the user
     to delegate money to various categories. Then return to the home prompt.
@@ -141,7 +140,7 @@ def add_paycheck():
             break
 
     paycheck_transaction = [float(paycheck), transaction_institution, date, "Income"]
-    append_transaction_row(paycheck_transaction)
+    append_transaction_row(paycheck_transaction, transactions_worksheet)
 
     clear_terminal()
     
@@ -153,18 +152,18 @@ def add_paycheck():
         print(f"{Fore.BLUE}{Style.BRIGHT}To make sure you don't have any unbudgeted money, you must delegate all the paycheck.\n")
         print("Here is how your current budget stands:")
         print(" ")
-        get_current_budget()
+        get_current_budget(category_worksheet)
         print(" ")
 
         left_to_delegate = round(float(left_to_delegate), 2)
         print(f"You have {Fore.GREEN}£{left_to_delegate}{Fore.RESET} left to delegate from your paycheck.\n")
         while True:
             selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to delegate money to:\n")
-            if validate_category_num_entry(selected_category):
+            if validate_category_num_entry(selected_category, category_worksheet):
                 break
         
         print(" ")
-        category_name = main.row_values(int(selected_category))[0]
+        category_name = category_worksheet.row_values(int(selected_category))[0]
         while True:
             amount_to_delegate = input(f"{Fore.YELLOW}How much would you like to put towards {category_name}?\n")
             if validate_number_entry(amount_to_delegate):
@@ -175,9 +174,9 @@ def add_paycheck():
         print(" ")
         print(f"Perfect. Adding {Fore.GREEN}£{rounded_down_amount_to_delegate}{Fore.RESET} to {category_name}...\n")
         
-        initial_category_amount = main.row_values(int(selected_category))[1]
+        initial_category_amount = category_worksheet.row_values(int(selected_category))[1]
         new_category_amount = float(initial_category_amount) + rounded_down_amount_to_delegate
-        main.update_cell(int(selected_category), 2, new_category_amount)
+        category_worksheet.update_cell(int(selected_category), 2, new_category_amount)
         
         left_to_delegate -= rounded_down_amount_to_delegate
         time.sleep(1.7)
@@ -200,13 +199,13 @@ def add_paycheck():
             break
     if end_of_transaction_decision == '1':
         clear_terminal()
-        add_transaction()
+        add_paycheck(category_worksheet, transactions_worksheet)
     else:
         clear_terminal()
-        home_prompt()
+        home_prompt(category_worksheet, transactions_worksheet)
 
 
-def add_transaction():
+def add_transaction(category_worksheet, transactions_worksheet):
     """
     Receives new transaction information, deducts money from appropriate
     budget categories, adds transaction to transaction list.
@@ -232,23 +231,23 @@ def add_transaction():
     transaction_amount = round(float(transaction_amount), 2)
     print_section_border()
     print(f"Great! From which category should this {Fore.RED}£{transaction_amount}{Fore.RESET} payment to {transaction_institution} be deducted?\n")
-    get_current_budget()
+    get_current_budget(category_worksheet)
     print(" ")
 
     while True:
         transaction_selected_category = input(f"{Fore.YELLOW}Type the number of the category this transaction falls under:\n")
-        if validate_category_num_entry(transaction_selected_category):
+        if validate_category_num_entry(transaction_selected_category, category_worksheet):
             break
     
-    transaction_category_name = main.row_values(int(transaction_selected_category))[0]
+    transaction_category_name = category_worksheet.row_values(int(transaction_selected_category))[0]
     print(" ")
     print(f"Deducting {Fore.RED}£{transaction_amount}{Fore.RESET} {transaction_institution} payment from {transaction_category_name}...")
-    initial_category_amount = main.row_values(int(transaction_selected_category))[1]
+    initial_category_amount = category_worksheet.row_values(int(transaction_selected_category))[1]
     new_category_amount = float(initial_category_amount) - transaction_amount
-    main.update_cell(int(transaction_selected_category), 2, new_category_amount)
+    category_worksheet.update_cell(int(transaction_selected_category), 2, new_category_amount)
     
     new_transaction_list = [-transaction_amount, transaction_institution, transaction_date, transaction_category_name]
-    append_transaction_row(new_transaction_list)
+    append_transaction_row(new_transaction_list, transactions_worksheet)
 
     clear_terminal()
     print("----------------------------------\n")
@@ -266,13 +265,13 @@ def add_transaction():
             break
     if end_of_transaction_decision == '1':
         clear_terminal()
-        add_transaction()
+        add_transaction(category_worksheet, transactions_worksheet)
     else:
         clear_terminal()
-        home_prompt()
+        home_prompt(category_worksheet, transactions_worksheet)
 
 
-def redelegate():
+def redelegate(category_worksheet, transactions_worksheet):
     """
     Allows the user to move money between the various budgeted categories
     """
@@ -281,23 +280,23 @@ def redelegate():
     print_section_border()
 
     print("Here is how your current budget stands:\n")
-    get_current_budget()
+    get_current_budget(category_worksheet)
     print(" ")
 
     while True:
         from_category_input = input(f"{Fore.YELLOW}Type the number of the category you wish to move money from:\n")
-        if validate_category_num_entry(from_category_input):
+        if validate_category_num_entry(from_category_input, category_worksheet):
             break
-    from_category_name = main.row_values(int(from_category_input))[0]
-    from_category_amount = main.row_values(int(from_category_input))[1]
+    from_category_name = category_worksheet.row_values(int(from_category_input))[0]
+    from_category_amount = category_worksheet.row_values(int(from_category_input))[1]
 
     while True:
         print(" ")
         to_category_input = input(f"{Fore.YELLOW}Type the number of the category you wish to move money from {from_category_name} towards:\n")
-        if validate_category_num_entry(to_category_input):
+        if validate_category_num_entry(to_category_input, category_worksheet):
             break
-    to_category_name = main.row_values(int(to_category_input))[0]
-    to_category_amount = main.row_values(int(to_category_input))[1]
+    to_category_name = category_worksheet.row_values(int(to_category_input))[0]
+    to_category_amount = category_worksheet.row_values(int(to_category_input))[1]
 
     print(" ")
     print(f"{from_category_name} has {Fore.GREEN}£{from_category_amount}{Fore.RESET} and {Fore.BLUE}{to_category_name}{Fore.RESET} has {Fore.GREEN}£{to_category_amount}{Fore.RESET}.\n")
@@ -313,10 +312,10 @@ def redelegate():
     transfer_amount_input = round(float(transfer_amount_input), 2)
 
     new_from_category_amount = float(from_category_amount) - float(transfer_amount_input)
-    main.update_cell(int(from_category_input), 2, new_from_category_amount)
+    category_worksheet.update_cell(int(from_category_input), 2, new_from_category_amount)
 
     new_to_category_amount = float(to_category_amount) + float(transfer_amount_input)
-    main.update_cell(int(to_category_input), 2, new_to_category_amount)
+    category_worksheet.update_cell(int(to_category_input), 2, new_to_category_amount)
     
     time.sleep(.7)
     clear_terminal()
@@ -327,7 +326,7 @@ def redelegate():
     print(f"{Style.NORMAL}{Fore.BLUE}{to_category_name}{Fore.RESET} now has {Fore.GREEN}£{new_to_category_amount}{Fore.RESET}")
     print_section_border()
 
-    get_current_budget()
+    get_current_budget(category_worksheet)
 
     print_section_border()
     while True:
@@ -342,13 +341,13 @@ def redelegate():
             break
     if end_of_transaction_decision == '1':
         clear_terminal()
-        redelegate()
+        redelegate(category_worksheet)
     else:
         clear_terminal()
-        home_prompt()
+        home_prompt(category_worksheet, transactions_worksheet)
 
 
-def update_balance():
+def update_balance(category_worksheet):
     """
     Allows the user to input their current bank balance 
     then prompts them to redelegate or add money so that 
@@ -364,16 +363,16 @@ def update_balance():
             break
 
     bank_balance = round(float(bank_balance_input), 2)
-    budgeted_amount = float(get_total_budgeted_amount())
+    budgeted_amount = float(get_total_budgeted_amount(category_worksheet))
 
     print(f"{Fore.RESET}")
     if bank_balance > budgeted_amount:
-        update_higher_bank_balance(bank_balance)
+        update_higher_bank_balance(bank_balance, category_worksheet)
     else:
-        update_lower_bank_balance(bank_balance)
+        update_lower_bank_balance(bank_balance, category_worksheet)
 
 
-def adjust_categories():
+def adjust_categories(category_worksheet, transactions_worksheet):
     """
     Lets the user select to either add or delete a category
     """
@@ -390,17 +389,17 @@ def adjust_categories():
     print(f"{Fore.RESET}")
     if adjust_decision == '1':
         clear_terminal()
-        add_category()
+        add_category(category_worksheet, transactions_worksheet)
     else:
         clear_terminal()
-        delete_category()
+        delete_category(category_worksheet, transactions_worksheet)
 
 
-def view_recent_transactions():
+def view_recent_transactions(category_worksheet, transactions_worksheet):
     """
     Lets the user request to see a specified amount of recent transactions
     """
-    amount_of_transactions = len(transactions.col_values(1)) - 1
+    amount_of_transactions = len(transactions_worksheet.col_values(1)) - 1
 
     print_section_border()
     print(f"You have {amount_of_transactions} transactions in your transaction list.")
@@ -410,10 +409,10 @@ def view_recent_transactions():
         transaction_amount_request = input(f"{Fore.YELLOW}How many of the most recent would you like to see?\n")
         if validate_transaction_list_num_entry(transaction_amount_request, amount_of_transactions):
             break
-    amounts = transactions.col_values(1)
-    institutions = transactions.col_values(2)
-    date = transactions.col_values(3)
-    category = transactions.col_values(4)
+    amounts = transactions_worksheet.col_values(1)
+    institutions = transactions_worksheet.col_values(2)
+    date = transactions_worksheet.col_values(3)
+    category = transactions_worksheet.col_values(4)
 
     print_section_border()
     print(f"{Fore.BLUE}Your {transaction_amount_request} most recent transactions are:\n")
@@ -436,13 +435,13 @@ Would you like to view more transactions?
             break
     if end_of_view_transaction_decision == '1':
         clear_terminal()
-        view_recent_transactions()
+        view_recent_transactions(category_worksheet, transactions_worksheet)
     else:
         clear_terminal()
-        home_prompt()
+        home_prompt(category_worksheet, transactions_worksheet)
 
 
-def add_category():
+def add_category(category_worksheet, transactions_worksheet):
     """
     Adds a category to the the category list. Allows the user to
     select the name and the starting amount
@@ -457,7 +456,7 @@ def add_category():
     print(f"Adding a {new_category_name} category to your category list...\n")
     print(f"Setting {new_category_name}'s starting amount to £0...")
     new_category_list = [new_category_name, 0]
-    main.append_row(new_category_list)
+    category_worksheet.append_row(new_category_list)
     print_section_border()
     print(
 """Would you like to adjust another category?
@@ -471,13 +470,13 @@ def add_category():
             break
     if end_of_add_category_decision == '1':
         clear_terminal()
-        adjust_categories()
+        adjust_categories(category_worksheet, transactions_worksheet)
     else:
         clear_terminal()
-        home_prompt()    
+        home_prompt(category_worksheet, transactions_worksheet)    
 
 
-def delete_category():
+def delete_category(category_worksheet, transactions_worksheet):
     """
     Allows the user to select the category to delete from the category list.
     Then prompts the user to redelegate the money from that category.
@@ -487,22 +486,22 @@ def delete_category():
     print_section_border()
     
     print(f"{Fore.RESET}Here is a list of your current categories:\n")
-    get_current_budget()
+    get_current_budget(category_worksheet)
     print(" ")
     while True:
         delete_selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to delete:\n")
-        if validate_category_num_entry(delete_selected_category):
+        if validate_category_num_entry(delete_selected_category, category_worksheet):
             break
     category_to_delete = int(delete_selected_category)
 
-    category_to_delete_name = main.row_values(category_to_delete)[0]
-    category_to_delete_amount = float(main.row_values(category_to_delete)[1])
+    category_to_delete_name = category_worksheet.row_values(category_to_delete)[0]
+    category_to_delete_amount = float(category_worksheet.row_values(category_to_delete)[1])
 
     clear_terminal()
     print(f"{Fore.RESET}----------------------------------\n")
     print(f"Deleting {category_to_delete_name} category...")
     print_section_border()
-    main.delete_rows(category_to_delete)
+    category_worksheet.delete_rows(category_to_delete)
     
 
     category_to_delete_amount = round(float(category_to_delete_amount), 2)
@@ -519,27 +518,27 @@ def delete_category():
         category_to_delete_amount = round(float(category_to_delete_amount), 2)
         print(f"There is {Fore.GREEN}£{category_to_delete_amount}{Fore.RESET} left to delegate from {category_to_delete_name}. Where do you wish to delegate it?\n")
         while True:
-            get_current_budget()
+            get_current_budget(category_worksheet)
             print(" ")
             delegation_category_input = input(f"{Fore.YELLOW}Type the number of the category you wish to delegate money to:\n")
-            if validate_category_num_entry(delegation_category_input):
+            if validate_category_num_entry(delegation_category_input, category_worksheet):
                 break
         
         delegation_category = int(delegation_category_input)
-        delegation_category_name = main.row_values(delegation_category)[0]
-        original_delegation_category_amount = float(main.row_values(delegation_category)[1])
+        delegation_category_name = category_worksheet.row_values(delegation_category)[0]
+        original_delegation_category_amount = float(category_worksheet.row_values(delegation_category)[1])
 
         while True:
             print(" ")
             print(f"{delegation_category_name} has {Fore.GREEN}£{original_delegation_category_amount}{Fore.RESET}.\n")
-            amount_to_delegate_input = input(f"{Fore.YELLOW}How much of the remaining {Fore.GREEN}£{category_to_delete_amount}{Fore.YELLOW} do you wish to put towards {delegation_category_name}?\n")
+            amount_to_delegate_input = input(f"{Fore.YELLOW}How much of the recategory_worksheeting {Fore.GREEN}£{category_to_delete_amount}{Fore.YELLOW} do you wish to put towards {delegation_category_name}?\n")
             if validate_delegation_max(amount_to_delegate_input, category_to_delete_amount):
                 break
         amount_to_delegate = round(float(amount_to_delegate_input), 2)
         print(" ")
         print(f"Adding {Fore.GREEN}£{amount_to_delegate}{Fore.RESET} to {delegation_category_name}...")
         new_delegation_category_amount = amount_to_delegate + original_delegation_category_amount
-        main.update_cell(delegation_category, 2, new_delegation_category_amount)
+        category_worksheet.update_cell(delegation_category, 2, new_delegation_category_amount)
         category_to_delete_amount -= amount_to_delegate
         time.sleep(2)
         while_count += 1
@@ -562,13 +561,13 @@ Would you like to adjust another category?
             break
     if end_of_add_category_decision == '1':
         clear_terminal()
-        adjust_categories()
+        adjust_categories(category_worksheet, transactions_worksheet)
     else:
         clear_terminal()
-        home_prompt()  
+        home_prompt(category_worksheet, transactions_worksheet)  
 
 
-def update_higher_bank_balance(bank_balance):
+def update_higher_bank_balance(bank_balance, category_worksheet):
     """
     Tells the user their bank balance is higher than their budget
     Then calculates how much money they have to delegate to make 
@@ -580,7 +579,7 @@ def update_higher_bank_balance(bank_balance):
     print(f"{Style.BRIGHT}To fix this, you will need to delegate money to your budget.")
     print_section_border()
 
-    budgeted_amount = get_total_budgeted_amount()
+    budgeted_amount = get_total_budgeted_amount(category_worksheet)
     left_to_delegate = round(bank_balance, 2) - round(budgeted_amount, 2)
 
     while_count = 0
@@ -593,18 +592,18 @@ def update_higher_bank_balance(bank_balance):
             print_section_border()
         print("Here is how your current budget stands:")
         print(" ")
-        get_current_budget()
+        get_current_budget(category_worksheet)
         print(" ")
             
         left_to_delegate = round(left_to_delegate, 2)
         print(f"You have {Fore.GREEN}£{left_to_delegate}{Fore.RESET} left to delegate.\n")
         while True:
             selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to delegate money to:\n")
-            if validate_category_num_entry(selected_category):
+            if validate_category_num_entry(selected_category, category_worksheet):
                 break
 
         print(" ")
-        category_name = main.row_values(int(selected_category))[0]
+        category_name = category_worksheet.row_values(int(selected_category))[0]
         while True:
             amount_to_delegate = input(f"{Fore.YELLOW}How much would you like to put towards {category_name}?\n")
             if validate_number_entry(amount_to_delegate):
@@ -615,9 +614,9 @@ def update_higher_bank_balance(bank_balance):
         print(" ")
         print(f"Perfect. Adding {Fore.GREEN}£{amount_to_delegate}{Fore.RESET} to {category_name}...\n")
         
-        initial_category_amount = main.row_values(int(selected_category))[1]
+        initial_category_amount = category_worksheet.row_values(int(selected_category))[1]
         new_category_amount = float(initial_category_amount) + float(amount_to_delegate)
-        main.update_cell(int(selected_category), 2, new_category_amount)
+        category_worksheet.update_cell(int(selected_category), 2, new_category_amount)
         time.sleep(2)
         
         left_to_delegate -= float(amount_to_delegate)
@@ -631,7 +630,7 @@ def update_higher_bank_balance(bank_balance):
     clear_terminal()
 
 
-def update_lower_bank_balance(bank_balance):
+def update_lower_bank_balance(bank_balance, category_worksheet):
     """
     Tells the user their bank balance is lower than their budget
     Then prompts them to withdraw money from their budget in order
@@ -643,7 +642,7 @@ def update_lower_bank_balance(bank_balance):
     print(f"{Style.BRIGHT}To fix this, you will need to deduct money from your budgeted categories")
     print_section_border()
 
-    budgeted_amount = get_total_budgeted_amount()
+    budgeted_amount = get_total_budgeted_amount(category_worksheet)
     left_to_deduct = round(float(budgeted_amount), 2) - round(float(bank_balance), 2)
 
     while_count = 0
@@ -656,18 +655,18 @@ def update_lower_bank_balance(bank_balance):
             print_section_border()
         print("Here is how your current budget stands:")
         print(" ")
-        get_current_budget()
+        get_current_budget(category_worksheet)
         print(" ")
 
         left_to_deduct = round(float(left_to_deduct), 2)
         print(f"You have {Fore.RED}£{left_to_deduct}{Fore.RESET} left to deduct.\n")
         while True:
             selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to deduct money from:\n")
-            if validate_category_num_entry(selected_category):
+            if validate_category_num_entry(selected_category, category_worksheet):
                 break
         
         print(" ")
-        category_name = main.row_values(int(selected_category))[0]
+        category_name = category_worksheet.row_values(int(selected_category))[0]
         while True:
             amount_to_deduct = input(f"{Fore.YELLOW}How much would you like to deduct from {category_name}?\n")
             if validate_number_entry(amount_to_deduct):
@@ -678,9 +677,9 @@ def update_lower_bank_balance(bank_balance):
         print(" ")
         print(f"Deducting {Fore.RED}£{amount_to_deduct}{Fore.RESET} from {category_name}\n")
         
-        initial_category_amount = main.row_values(int(selected_category))[1]
+        initial_category_amount = category_worksheet.row_values(int(selected_category))[1]
         new_category_amount = float(initial_category_amount) - float(amount_to_deduct)
-        main.update_cell(int(selected_category), 2, new_category_amount)
+        category_worksheet.update_cell(int(selected_category), 2, new_category_amount)
         
         left_to_deduct -= float(amount_to_deduct)
         while_count += 1
@@ -700,10 +699,10 @@ def validate_home_data(value):
     """
     try:
         if int(value) > 7:
-            raise ValueError(f"You must enter a {Fore.BLUE}number{Fore.RESET} between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}5{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
+            raise ValueError(f"You must enter a {Fore.BLUE}number{Fore.RESET} between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}5{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}.")
     except ValueError as e:
         print(" ")
-        print(f"Invalid entry: {e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
+        print(f"Invalid entry: {e}\n")
         return False
     return True
 
@@ -714,25 +713,25 @@ def validate_number_entry(value):
     """
     try:
         if float(value) < .01:
-            raise ValueError(f"You must enter a {Fore.BLUE}number greater than 1{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
+            raise ValueError(f"You must enter a {Fore.BLUE}number greater than 1{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}.")
     except ValueError as e:
         print(" ")
-        print(f"Invalid entry: {e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
+        print(f"Invalid entry: {e}\n")
         return False
     return True
 
 
-def validate_category_num_entry(value):
+def validate_category_num_entry(value, category_worksheet):
     """
     Used to validate whether an input entry exceeds the number of budget categories.
     """
-    entry_amount = len(main.col_values(1))
+    entry_amount = len(category_worksheet.col_values(1))
     try:
         if int(value) > int(entry_amount):
             raise ValueError(f"You must enter a {Fore.BLUE}number{Fore.RESET} between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}{entry_amount}{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
         print(" ")
-        print(f"Invalid entry: {e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
+        print(f"Invalid entry: {e}.\n")
         return False
     return True
 
@@ -748,7 +747,7 @@ def validate_delegation_max(value, max):
             raise ValueError(f"You must enter a {Fore.BLUE}number{Fore.RESET} between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}{max}{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
         print(" ")
-        print(f"Invalid entry: {e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
+        print(f"Invalid entry: {e}.\n")
         return False
     return True
 
@@ -776,7 +775,7 @@ def validate_y_n_entry(value):
             raise ValueError(f"You must enter either {Fore.BLUE}1{Fore.RESET} or {Fore.BLUE}2{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
         print(" ")
-        print(f"Invalid entry: {e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
+        print(f"Invalid entry: {e}.\n")
         return False
     return True
 
@@ -790,16 +789,16 @@ def validate_transaction_list_num_entry(value, max):
             raise ValueError(f"You must enter a {Fore.BLUE}number{Fore.RESET} between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}{max}{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}\n")
     except ValueError as e:
         print(" ")
-        print(f"Invalid entry: {e}, please type a {Fore.BLUE}number{Fore.RESET}.\n")
+        print(f"Invalid entry: {e}.\n")
         return False
     return True
 
 
-def append_transaction_row(value):
+def append_transaction_row(value, transactions_worksheet):
     """
     Append a row to the transaction list
     """
-    transactions.append_row(value)
+    transactions_worksheet.append_row(value)
 
 
 def print_section_border():
@@ -886,18 +885,18 @@ def set_up_new_budget():
         print(f"{Style.BRIGHT}Setting up your budget...")
         print_section_border()
         time.sleep(2)
-        main.clear()
-        num_of_rows = int(transactions.row_count)
+        category_worksheet.clear()
+        num_of_rows = int(transactions_worksheet.row_count)
         if num_of_rows > 1:
-            transactions.delete_rows(2, num_of_rows)
+            transactions_worksheet.delete_rows(2, num_of_rows)
         clear_terminal()
         set_up_preset_budget()
         add_money_to_new_budget()
     else:
-        main.clear()
-        num_of_rows = int(transactions.row_count)
+        category_worksheet.clear()
+        num_of_rows = int(transactions_worksheet.row_count)
         if num_of_rows > 1:
-            transactions.delete_rows(2, num_of_rows)
+            transactions_worksheet.delete_rows(2, num_of_rows)
         clear_terminal()
         build_new_budget()
         add_money_to_new_budget()
@@ -908,7 +907,7 @@ def set_up_preset_budget():
     Fills the budget spreadsheet with preset data
     """
     preset_categories = [["Rent", 0], ["Utilities", 0], ["Phone Bill", 0], ["Insurance", 0], ["Debt", 0], ["Retirement", 0], ["Groceries", 0], ["Transportation", 0], ["Entertainment", 0], ["Travel", 0], ["Miscellaneous", 0], ["Spending Money", 0]]
-    main.append_rows(preset_categories)
+    category_worksheet.append_rows(preset_categories)
 
 
 def add_money_to_new_budget():
@@ -920,7 +919,7 @@ def add_money_to_new_budget():
     print_section_border()
 
     print("Here is your current Budget\n")
-    get_current_budget()
+    get_current_budget(category_worksheet)
 
     print(" ")
     print(f"{Fore.BLUE}This budget relies on the budgeted amount matching your bank account balance.\n")
@@ -934,7 +933,7 @@ def add_money_to_new_budget():
     today = get_today.strftime("%d-%m-%y")
 
     initial_transaction = [left_to_delegate, "Initial Bank Balance", today, "Income"]
-    append_transaction_row(initial_transaction)
+    append_transaction_row(initial_transaction, transactions_worksheet)
 
     clear_terminal()
     
@@ -946,18 +945,18 @@ def add_money_to_new_budget():
         print(f"{Fore.BLUE}{Style.BRIGHT}To make sure you don't have any unbudgeted money, you must delegate all this balance.\n")
         print("Here is how your current budget stands:")
         print(" ")
-        get_current_budget()
+        get_current_budget(category_worksheet)
         print(" ")
 
         left_to_delegate = round(float(left_to_delegate), 2)
         print(f"You have {Fore.GREEN}£{left_to_delegate}{Fore.RESET} left to delegate from your balance.\n")
         while True:
             selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to delegate money to:\n")
-            if validate_category_num_entry(selected_category):
+            if validate_category_num_entry(selected_category, category_worksheet):
                 break
         
         print(" ")
-        category_name = main.row_values(int(selected_category))[0]
+        category_name = category_worksheet.row_values(int(selected_category))[0]
         while True:
             amount_to_delegate = input(f"{Fore.YELLOW}How much would you like to put towards {category_name}?\n")
             if validate_number_entry(amount_to_delegate):
@@ -968,9 +967,9 @@ def add_money_to_new_budget():
         print(" ")
         print(f"Perfect. Adding {Fore.GREEN}£{rounded_down_amount_to_delegate}{Fore.RESET} to {category_name}...\n")
         
-        initial_category_amount = main.row_values(int(selected_category))[1]
+        initial_category_amount = category_worksheet.row_values(int(selected_category))[1]
         new_category_amount = float(initial_category_amount) + rounded_down_amount_to_delegate
-        main.update_cell(int(selected_category), 2, new_category_amount)
+        category_worksheet.update_cell(int(selected_category), 2, new_category_amount)
         
         left_to_delegate -= rounded_down_amount_to_delegate
         time.sleep(2)
@@ -987,7 +986,7 @@ def add_money_to_new_budget():
     print_section_border()
     time.sleep(2)
     clear_terminal()
-    home_prompt()
+    home_prompt(category_worksheet, transactions_worksheet)
 
 def build_new_budget():
     """
@@ -1004,7 +1003,7 @@ def build_new_budget():
         if categories_entered > 0:
             print("Your budget so far:")
             print(" ")
-            get_current_budget()
+            get_current_budget(category_worksheet)
             print(" ")
 
         print(f"You have entered {categories_entered} out of 5 required categories\n")
@@ -1017,7 +1016,7 @@ def build_new_budget():
         print(f"Setting {new_category_name}'s starting amount to £0...")
         time.sleep(1)
         new_category_list = [new_category_name, 0]
-        main.append_row(new_category_list)
+        category_worksheet.append_row(new_category_list)
         categories_entered += 1
         clear_terminal()
     
@@ -1030,7 +1029,7 @@ def add_another_category_intro(categories_entered):
     """
     Allows user to add more than 5 categories during build new budget
     """
-    category_count = len(main.col_values(1))
+    category_count = len(category_worksheet.col_values(1))
     print(f"{Fore.RESET}----------------------------------\n")
     print(f"{Style.BRIGHT}Great! You have added {category_count} categories to your budget!")
     print_section_border()
@@ -1053,7 +1052,7 @@ def add_another_category_intro(categories_entered):
 
         print("Your budget so far:")
         print(" ")
-        get_current_budget()
+        get_current_budget(category_worksheet)
         print(" ")
 
         print(f"You have entered {category_count} categories so far\n")
@@ -1066,13 +1065,22 @@ def add_another_category_intro(categories_entered):
         print(f"Setting {new_category_name}'s starting amount to £0...")
         time.sleep(1)
         new_category_list = [new_category_name, 0]
-        main.append_row(new_category_list)
+        category_worksheet.append_row(new_category_list)
         clear_terminal()
         add_another_category_intro(category_count)
     else:
         clear_terminal()
     
-    
+
+def create_account():
+    """
+    Allows user to create their own budgeting account
+    """
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Let's get your account set up")
+    print_section_border()
+
+
 
 
 def startup_prompt():
@@ -1084,10 +1092,10 @@ def startup_prompt():
     startup_view()
     print(
     """
-Is this your first time using the app?
+What would you like to do?
 
-1. Yes
-2. No
+1. Log in
+2. Create an Account
 """
         )
     while True:
@@ -1096,17 +1104,85 @@ Is this your first time using the app?
             break
     if keep_or_start == '1':
         clear_terminal()
-        set_up_new_budget()
-    else:
+        print(f"{Fore.RESET}----------------------------------\n")
+        print(f"{Style.BRIGHT}Log In")
+        print_section_border()
+
+        emails_list = users_sheet.col_values(2)
+        usernames_list = users_sheet.col_values(3)
+        usernames_email_list = emails_list + usernames_list
+
+        while True:
+            username = input(f"{Fore.YELLOW}Enter your username or email:\n")
+            if username not in usernames_email_list:
+                print(f"{Fore.RESET}")
+                print("Sorry, there's no account with that username or email")
+                print(" ")
+            else:
+                break
+
+        username_row = users_sheet.find(username).row
+        user_first_name = users_sheet.row_values(username_row)[0]
+
+        while_count = 0
+        while True:
+            print(" ")
+            password = input(f"{Fore.YELLOW}Enter your password:\n")
+
+            if password == users_sheet.row_values(username_row)[3]:
+                break
+            else:
+                print(f"{Fore.RESET} ")
+                print("Sorry, that password is incorrect")
+                while_count += 1
+                if while_count == 3:
+                    clear_terminal()
+                    print(f"{Fore.RESET}----------------------------------\n")
+                    print(f"{Style.BRIGHT}Log In")
+                    print_section_border()
+                    print("You have failed to log in 3 times\n")
+                    print(
+    """
+Would you like to create an account?
+
+1. Yes
+2. No, I'll try my password again
+"""
+        )
+                    while True:
+                        password_fail = input(f"{Fore.YELLOW}Type 1 or 2\n")
+                        if validate_y_n_entry(password_fail):
+                            break
+                        if password_fail == 1:
+                            print("Let's create your account")
+
+
+        category_worksheet_name = username + "_"
+        transaction_name = username + "_"
+        category_worksheet = SHEET.worksheet(category_worksheet_name + 'main')
+        transactions_worksheet = SHEET.worksheet(transaction_name + 'transactions')
+        time.sleep(1)
+
         clear_terminal()
         print(f"{Fore.RESET}----------------------------------\n")
-        print(f"{Style.BRIGHT}Welcome Back. Retrieving your Budget...")
+        print(f"{Style.BRIGHT}Welcome Back, {user_first_name}. Retrieving your Budget...")
         print_section_border()
         time.sleep(2)
         clear_terminal()
-        home_prompt()
+        home_prompt(category_worksheet, transactions_worksheet)
+    else:
+        clear_terminal()
+        create_account()
+        set_up_new_budget()
 
-
-
+# username = input("Type your username:\n")
+# category_worksheet_name = username + "_"
+# transaction_name = username + "_"
+# 
+# SHEET.add_worksheet(category_worksheet_name + "category_worksheet", 1, 2)
+# SHEET.add_worksheet(transaction_name + "transactions", 1, 4)
+# 
+# category_worksheet = SHEET.worksheet(category_worksheet_name + 'category_worksheet')
+# transactions_worksheet = SHEET.worksheet(transaction_name + 'transactions')
 
 startup_prompt()
