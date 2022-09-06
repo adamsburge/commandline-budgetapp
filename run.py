@@ -923,7 +923,11 @@ def redelegate(category_worksheet, transactions_worksheet):
             f"to the {Fore.BLUE}{to_category_name}{Fore.YELLOW} category?\n")
         if validate_delegation_max(transfer_amount_input,
                                    from_category_amount):
-            break
+            if int(transfer_amount_input) <= 0:
+                print(" ")
+                print("Please input a number above 0\n")
+            else:
+                break
     print(f"{Fore.RESET}")
     print(f"{Fore.RESET}Moving your money...")
 
