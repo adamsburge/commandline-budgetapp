@@ -846,7 +846,7 @@ def txt_effect(text_to_print):
 
 def startup_view():
     """
-    Playsw the startup welcome effect
+    Plays the startup welcome effect
     """
     clear_terminal()
     txt_effect("----------------------------------\n")
@@ -1235,9 +1235,28 @@ def log_in():
     while True:
         username = input(f"{Fore.YELLOW}Enter your username or email:\n")
         if username not in usernames_email_list:
-            print(f"{Fore.RESET}")
-            print("Sorry, there's no account with that username or email")
             print(" ")
+            print("Sorry, that username doesn't exist.")
+            print(
+"""
+Would you like to create an account?
+
+1. Yes
+2. No, I'll try again
+"""
+    )
+            while True:
+                username_fail = input(f"{Fore.YELLOW}Type 1 or 2\n")
+                if validate_y_n_entry(username_fail):
+                    break
+            if username_fail == '1':
+                clear_terminal()
+                create_account()
+            else:
+                clear_terminal()
+                print(f"{Fore.RESET}----------------------------------\n")
+                print(f"{Style.BRIGHT}Log In")
+                print_section_border()
         else:
             break
 
@@ -1273,8 +1292,11 @@ Would you like to create an account?
                     password_fail = input(f"{Fore.YELLOW}Type 1 or 2\n")
                     if validate_y_n_entry(password_fail):
                         break
-                    if password_fail == 1:
-                        print("Let's create your account")
+                if password_fail == '1':
+                    clear_terminal()
+                    create_account()
+                else:
+                    print(" ")
 
 
     category_worksheet_name = username + "_"
