@@ -46,7 +46,7 @@ def home_prompt(category_worksheet, transactions_worksheet):
     4. View Recent Transactions
     5. Add or Delete Categories
     6. My Bank Balance Doesn't Match the Budgeted Amount
-    7. I'm done budgeting
+    7. Log out
     """
     )
     while True:
@@ -78,12 +78,11 @@ def home_prompt(category_worksheet, transactions_worksheet):
         home_prompt(category_worksheet, transactions_worksheet)
     else:
         print("----------------------------------\n")
-        print(" ")
-        print(f"{Style.BRIGHT}Thanks for budgeting! Exiting the Application...")
-        print(" ")
+        print(f"{Style.BRIGHT}Thanks for budgeting! Logging out...")
         print(" ")
         print("----------------------------------")
-
+        time.sleep(2)
+        startup_prompt()
 
 def get_total_budgeted_amount(category_worksheet):
     """
@@ -769,11 +768,24 @@ def validate_date_entry(value):
 
 def validate_y_n_entry(value):
     """
-    Validates any inputs which require yes or no answers
+    Validates any inputs which require 2 options
     """
     try:
         if value not in ["1", "2"]:
             raise ValueError(f"You must enter either {Fore.BLUE}1{Fore.RESET} or {Fore.BLUE}2{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
+    except ValueError as e:
+        print(" ")
+        print(f"Invalid entry: {e}.\n")
+        return False
+    return True
+
+def validate_3_entry(value):
+    """
+    Validates any inputs with 3 options
+    """
+    try:
+        if value not in ["1", "2", "3"]:
+            raise ValueError(f"You must enter a number between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}3{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
         print(" ")
         print(f"Invalid entry: {e}.\n")
@@ -1156,6 +1168,58 @@ Would you like to log in?
     return new_username
 
 
+def delete_account():
+    """
+    Allows users to delete their account from the database and app
+    """
+    clear_terminal()
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Not a problem. Just a few questions and then your account will be deleted.")
+    print_section_border()
+
+    emails_list = users_sheet.col_values(2)
+    usernames_list = users_sheet.col_values(3)
+    usernames_email_list = emails_list + usernames_list
+
+    while True:
+        username = input(f"{Fore.YELLOW}Enter your username or email:\n")
+        if username not in usernames_email_list:
+            print(f"{Fore.RESET}")
+            print("Sorry, there's no account with that username or email")
+            print(" ")
+        else:
+            break
+
+    username_row = users_sheet.find(username).row
+    user_first_name = users_sheet.row_values(username_row)[0]
+
+    while_count = 0
+    while True:
+        print(" ")
+        password = input(f"{Fore.YELLOW}Enter your password:\n")
+
+        if password == users_sheet.row_values(username_row)[3]:
+            break
+        else:
+            print(f"{Fore.RESET} ")
+            print("Sorry, that password is incorrect")    
+
+    category_worksheet_name = username + "_"
+    transaction_name = username + "_"
+    category_worksheet = SHEET.worksheet(category_worksheet_name + 'main')
+    transactions_worksheet = SHEET.worksheet(transaction_name + 'transactions')
+
+    users_sheet.delete_row(username_row)
+    SHEET.del_worksheet(category_worksheet)
+    SHEET.del_worksheet(transactions_worksheet)
+
+    clear_terminal()
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Your account has been deleted...")
+    print_section_border()
+    time.sleep(2)
+    startup_prompt()
+
 def log_in():
     """
     Allows user to log in
@@ -1241,30 +1305,24 @@ def startup_prompt():
 What would you like to do?
 
 1. Log in
-2. Create an Account
+2. Create an account
+3. Delete my account
 """
         )
     while True:
         keep_or_start = input(f"{Fore.YELLOW}Type 1 or 2\n")
-        if validate_y_n_entry(keep_or_start):
+        if validate_3_entry(keep_or_start):
             break
     if keep_or_start == '1':
         clear_terminal()
         log_in()
         
-    else:
+    elif keep_or_start == '2':
         clear_terminal()
         get_username = create_account()
         set_up_new_budget(get_username)
+    else:
+        delete_account()
 
-# username = input("Type your username:\n")
-# category_worksheet_name = username + "_"
-# transaction_name = username + "_"
-# 
-# SHEET.add_worksheet(category_worksheet_name + "category_worksheet", 1, 2)
-# SHEET.add_worksheet(transaction_name + "transactions", 1, 4)
-# 
-# category_worksheet = SHEET.worksheet(category_worksheet_name + 'category_worksheet')
-# transactions_worksheet = SHEET.worksheet(transaction_name + 'transactions')
 
 startup_prompt()
