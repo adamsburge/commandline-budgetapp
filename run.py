@@ -1362,13 +1362,17 @@ def update_lower_bank_balance(bank_balance, category_worksheet):
         print(" ")
         category_name = category_worksheet.row_values(
             int(selected_category))[0]
+        selected_category_amount = category_worksheet.row_values(
+            int(selected_category))[1]
         while True:
             amount_to_deduct = input(
                 f"{Fore.YELLOW}How much would you like "
                 f"to deduct from {category_name}?\n")
             if validate_number_entry(amount_to_deduct):
                 if validate_delegation_max(amount_to_deduct, left_to_deduct):
-                    break
+                    if validate_delegation_max(amount_to_deduct,
+                                               selected_category_amount):
+                        break
         amount_to_deduct = round(float(amount_to_deduct), 2)
 
         print(" ")
@@ -1403,7 +1407,7 @@ def validate_home_data(value):
         if int(value) > 7:
             raise ValueError(
                 f"You must enter a {Fore.BLUE}number{Fore.RESET} "
-                f"between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}5"
+                f"between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}7"
                 f"{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}.")
     except ValueError as e:
         print(" ")
