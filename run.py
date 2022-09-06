@@ -1356,9 +1356,15 @@ def update_lower_bank_balance(bank_balance, category_worksheet):
             selected_category = input(
                 f"{Fore.YELLOW}Type the number of "
                 "the category you wish to deduct money from:\n")
+            selected_category_amount = category_worksheet.row_values(
+                int(selected_category))[1]
             if validate_category_num_entry(selected_category,
                                            category_worksheet):
-                break
+                if int(selected_category_amount) <= 0:
+                    print(" ")
+                    print("That category has £0. Select another category.\n")
+                else:
+                    break
         print(" ")
         category_name = category_worksheet.row_values(
             int(selected_category))[0]
