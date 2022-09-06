@@ -1442,6 +1442,9 @@ def validate_category_num_entry(value, category_worksheet):
                 f"between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}"
                 f"{entry_amount}{Fore.RESET}. You entered {Fore.RED}"
                 f"{value}{Fore.RESET}")
+        elif int(value) <= 0:
+            raise ValueError(
+                "You must enter a number greater than 0")
     except ValueError as e:
         print(" ")
         print(f"Invalid entry: {e}.\n")
