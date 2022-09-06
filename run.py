@@ -890,9 +890,15 @@ def redelegate(category_worksheet, transactions_worksheet):
         from_category_input = input(
             f"{Fore.YELLOW}Type the number of the category you wish to move "
             "money from:\n")
+        selected_category_amount = category_worksheet.row_values(
+                int(from_category_input))[1]
         if validate_category_num_entry(from_category_input,
                                        category_worksheet):
-            break
+            if int(selected_category_amount) <= 0:
+                    print(" ")
+                    print("That category has £0. Select another category.\n")
+            else:
+                break
     from_category_name = category_worksheet.row_values(
         int(from_category_input))[0]
     from_category_amount = category_worksheet.row_values(
