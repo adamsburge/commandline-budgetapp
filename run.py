@@ -24,11 +24,526 @@ SHEET = GSPREAD_CLIENT.open('commandline-budgetapp')
 users_sheet = SHEET.worksheet('users')
 
 
+# Functions for the startup prompt
+
+def startup_view():
+    """
+    Plays the startup welcome effect
+    """
+    clear_terminal()
+    txt_effect("----------------------------------\n")
+    print(" ")
+    txt_effect("Welcome to Commandline BudgetApp\n")
+    print(" ")
+    txt_effect("----------------------------------\n")
+    time.sleep(1.7)
+
+
+def startup_prompt():
+    """
+    Function called at the launch of the program.
+    It plays the startup view, then allows the user to either
+    keep using their old budget or create a new one
+    """
+    startup_view()
+    print("""
+What would you like to do?
+
+1. Log in
+2. Create an account
+3. Delete my account
+4. Quit app
+""")
+    while True:
+        keep_or_start = input(f"{Fore.YELLOW}Type a number between 1 and 4\n")
+        if validate_4_entry(keep_or_start):
+            break
+    if keep_or_start == '1':
+        clear_terminal()
+        log_in()
+    elif keep_or_start == '2':
+        clear_terminal()
+        get_username = create_account()
+        set_up_new_budget(get_username)
+    elif keep_or_start == '3':
+        delete_account()
+    else:
+        clear_terminal()
+        print(f"{Fore.RESET}----------------------------------\n")
+        print(f"{Style.BRIGHT}Quitting app...")
+        print(" ")
+        print("----------------------------------")
+        time.sleep(2)
+        clear_terminal()
+        print(f"{Fore.RESET}----------------------------------\n")
+        print(f"{Style.BRIGHT}Thanks for using Commandline BudgetApp")
+        print(" ")
+        print("----------------------------------")
+
+
+def log_in():
+    """
+    Allows user to log in
+    """
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Log In")
+    print_section_border()
+
+    emails_list = users_sheet.col_values(2)
+    usernames_list = users_sheet.col_values(3)
+    usernames_email_list = emails_list + usernames_list
+
+    while True:
+        username = input(f"{Fore.YELLOW}Enter your username or email:\n")
+        if username not in usernames_email_list:
+            print(" ")
+            print("Sorry, that username doesn't exist.")
+            print("""
+Would you like to create an account?
+
+1. Yes
+2. No, I'll try again
+""")
+            while True:
+                username_fail = input(f"{Fore.YELLOW}Type 1 or 2\n")
+                if validate_y_n_entry(username_fail):
+                    break
+            if username_fail == '1':
+                clear_terminal()
+                create_account()
+            else:
+                clear_terminal()
+                print(f"{Fore.RESET}----------------------------------\n")
+                print(f"{Style.BRIGHT}Log In")
+                print_section_border()
+        else:
+            break
+
+    username_row = users_sheet.find(username).row
+    user_first_name = users_sheet.row_values(username_row)[0]
+
+    while_count = 0
+    while True:
+        print(" ")
+        password = input(f"{Fore.YELLOW}Enter your password:\n")
+
+        if password == users_sheet.row_values(username_row)[3]:
+            break
+        else:
+            print(f"{Fore.RESET} ")
+            print("Sorry, that password is incorrect")
+            while_count += 1
+            if while_count == 3:
+                clear_terminal()
+                print(f"{Fore.RESET}----------------------------------\n")
+                print(f"{Style.BRIGHT}Log In")
+                print_section_border()
+                print("You have failed to log in 3 times\n")
+                print("""
+Would you like to create an account?
+
+1. Yes
+2. No, I'll try my password again
+""")
+                while True:
+                    password_fail = input(f"{Fore.YELLOW}Type 1 or 2\n")
+                    if validate_y_n_entry(password_fail):
+                        break
+                if password_fail == '1':
+                    clear_terminal()
+                    create_account()
+                else:
+                    print(" ")
+
+    category_worksheet_name = username + "_"
+    transaction_name = username + "_"
+    category_worksheet = SHEET.worksheet(category_worksheet_name + 'main')
+    transactions_worksheet = SHEET.worksheet(transaction_name + 'transactions')
+    time.sleep(1)
+
+    clear_terminal()
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Welcome Back, {user_first_name}. Retrieving your Budget...")
+    print_section_border()
+    time.sleep(2)
+    clear_terminal()
+
+    home_prompt(category_worksheet, transactions_worksheet)
+
+
+def create_account():
+    """
+    Allows user to create their own budgeting account
+    """
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Let's get your account set up")
+    print_section_border()
+
+    first_name = input(f"{Fore.YELLOW}What is your first name?\n").capitalize()
+    print(" ")
+    emails_list = users_sheet.col_values(2)
+    usernames_list = users_sheet.col_values(3)
+
+    while True:
+        email = input(f"{Fore.YELLOW}Enter your email address:\n")
+        regex_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        if re.fullmatch(regex_email, email):
+            if email in emails_list:
+                print(" ")
+                print("That email already exists")
+                print("""
+Would you like to log in?
+
+1. Yes
+2. No
+""")
+                while True:
+                    email_fail = input(f"{Fore.YELLOW}Type 1 or 2\n")
+                    print(" ")
+                    if email_fail in ["1"]:
+                        clear_terminal()
+                        log_in()
+                    elif email_fail in ["2"]:
+                        break
+                    else:
+                        print(" ")
+                        print("Please type either 1 or 2")
+            else:
+                break
+        else:
+            print(" ")
+            print("Invalid Email\n")
+    while True:
+        print(" ")
+        new_username = input(f"{Fore.YELLOW}Now enter a username. Make sure it does not have any spaces:\n")
+        if (" " in new_username):
+            print(f"{Fore.RESET}")
+            print("Your username had a space in it. Try again without spaces.")
+        else:
+            if new_username in usernames_list:
+                print(" ")
+                print("That username already exists")
+                print("""
+Would you like to log in?
+
+1. Yes
+2. No, I'll pick a different username
+""")
+                while True:
+                    email_fail = input(f"{Fore.YELLOW}Type 1 or 2\n")
+                    print(" ")
+                    if email_fail in ["1"]:
+                        clear_terminal()
+                        log_in()
+                    elif email_fail in ["2"]:
+                        break
+                    else:
+                        print(" ")
+                        print("Please type either 1 or 2")
+            else:
+                break
+    while True:
+        print(" ")
+        password_entry_1 = input(f"{Fore.YELLOW}Now enter a password that you will be sure to remember\n")
+        print(" ")
+        password_entry_2 = input(f"{Fore.YELLOW}Retype that password:\n")
+        if password_entry_1 == password_entry_2:
+            break
+        else:
+            print(f"{Fore.RESET}")
+            print("Your passwords do not match. Try again.")
+    new_user_info = [first_name, email, new_username, password_entry_2]
+    users_sheet.append_row(new_user_info)
+
+    clear_terminal()
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Setting up your account...")
+    print_section_border()
+    time.sleep(2)
+
+    return new_username
+
+
+def delete_account():
+    """
+    Allows users to delete their account from the database and app
+    """
+    clear_terminal()
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Not a problem. Just a few questions and then your account will be deleted.")
+    print_section_border()
+
+    emails_list = users_sheet.col_values(2)
+    usernames_list = users_sheet.col_values(3)
+    usernames_email_list = emails_list + usernames_list
+
+    while True:
+        username = input(f"{Fore.YELLOW}Enter your username or email:\n")
+        if username not in usernames_email_list:
+            print(f"{Fore.RESET}")
+            print("Sorry, there's no account with that username or email")
+            print(" ")
+        else:
+            break
+
+    username_row = users_sheet.find(username).row
+    user_first_name = users_sheet.row_values(username_row)[0]
+
+    while_count = 0
+    while True:
+        print(" ")
+        password = input(f"{Fore.YELLOW}Enter your password:\n")
+
+        if password == users_sheet.row_values(username_row)[3]:
+            break
+        else:
+            print(f"{Fore.RESET} ")
+            print("Sorry, that password is incorrect")
+
+    category_worksheet_name = username + "_"
+    transaction_name = username + "_"
+    category_worksheet = SHEET.worksheet(category_worksheet_name + 'main')
+    transactions_worksheet = SHEET.worksheet(transaction_name + 'transactions')
+
+    users_sheet.delete_row(username_row)
+    SHEET.del_worksheet(category_worksheet)
+    SHEET.del_worksheet(transactions_worksheet)
+
+    clear_terminal()
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Your account has been deleted...")
+    print_section_border()
+    time.sleep(2)
+    startup_prompt()
+
+
+# Functions for building a new budget
+
+def set_up_new_budget(username):
+    """
+    Guides the user through a process to set up a new budget
+    """
+    clear_terminal()
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Let's get your new budget set up")
+    print_section_border()
+    print("Here is our preset budget:")
+    print(f"""
+1.  Rent:------------------------{Fore.GREEN}£0{Fore.RESET}
+2.  Utilities:-------------------{Fore.GREEN}£0{Fore.RESET}
+3.  Phone Bill:------------------{Fore.GREEN}£0{Fore.RESET}
+4.  Insurance:-------------------{Fore.GREEN}£0{Fore.RESET}
+5.  Debt:------------------------{Fore.GREEN}£0{Fore.RESET}
+6.  Retirement:------------------{Fore.GREEN}£0{Fore.RESET}
+7.  Groceries:-------------------{Fore.GREEN}£0{Fore.RESET}
+8.  Transportation:--------------{Fore.GREEN}£0{Fore.RESET}
+9.  Entertainment:---------------{Fore.GREEN}£0{Fore.RESET}
+10. Travel:----------------------{Fore.GREEN}£0{Fore.RESET}
+11. Miscellaneous:---------------{Fore.GREEN}£0{Fore.RESET}
+12. Spending Money:--------------{Fore.GREEN}£0{Fore.RESET}
+""")
+    print(f"{Fore.BLUE}Would you like to use the preset budget or build your own?{Fore.RESET}\n")
+    print("(Both will allow you to further adjust your categories categories after the setup)")
+    print("""
+1. I'll use the preset
+2. I want to build my own
+""")
+    while True:
+        preset_or_build = input(f"{Fore.YELLOW}Type 1 or 2\n")
+        if validate_y_n_entry(preset_or_build):
+            break
+    SHEET.add_worksheet(username + "_main", 1, 2)
+    SHEET.add_worksheet(username + "_transactions", 1, 4)
+    category_worksheet_name = username + "_"
+    transaction_name = username + "_"
+    category_worksheet = SHEET.worksheet(category_worksheet_name + 'main')
+    transactions_worksheet = SHEET.worksheet(transaction_name + 'transactions')
+    transactions_worksheet.update_acell('A1', 'amount')
+    transactions_worksheet.update_acell('B1', 'insitution')
+    transactions_worksheet.update_acell('C1', 'date')
+    transactions_worksheet.update_acell('D1', 'budget category')
+    if preset_or_build == '1':
+        clear_terminal()
+        print(f"{Fore.RESET}----------------------------------\n")
+        print(f"{Style.BRIGHT}Setting up your budget...")
+        print_section_border()
+        time.sleep(2)
+        clear_terminal()
+
+        set_up_preset_budget(category_worksheet, transactions_worksheet)
+        add_money_to_new_budget(category_worksheet, transactions_worksheet)
+    else:
+        clear_terminal()
+        build_new_budget(category_worksheet, transactions_worksheet)
+        add_money_to_new_budget(category_worksheet, transactions_worksheet)
+
+
+def set_up_preset_budget(category_worksheet, transactions_worksheet):
+    """
+    Fills the budget spreadsheet with preset data
+    """
+    preset_categories = [["Rent", 0], ["Utilities", 0], ["Phone Bill", 0], ["Insurance", 0], ["Debt", 0], ["Retirement", 0], ["Groceries", 0], ["Transportation", 0], ["Entertainment", 0], ["Travel", 0], ["Miscellaneous", 0], ["Spending Money", 0]]
+    category_worksheet.append_rows(preset_categories)
+
+
+def build_new_budget(category_worksheet, transactions_worksheet):
+    """
+    Allows the user to input their own categories into the cleared budget
+    """
+    categories_entered = 0
+    for i in range(5):
+        print(f"{Fore.RESET}----------------------------------\n")
+        print(f"{Style.BRIGHT}Great! Let's build your budget")
+        print_section_border()
+
+        print(f"{Fore.BLUE}To make things easier later on, you must add at least 5 budget categories right now{Fore.RESET}\n")
+
+        if categories_entered > 0:
+            print("Your budget so far:")
+            print(" ")
+            get_current_budget(category_worksheet)
+            print(" ")
+
+        print(f"You have entered {categories_entered} out of 5 required categories\n")
+
+        new_category_name = input(f"{Fore.YELLOW}Type the name of a category to add it\n")
+
+        print(" ")
+        print(f"Adding a {new_category_name} category to your category list...\n")
+        time.sleep(1)
+        print(f"Setting {new_category_name}'s starting amount to £0...")
+        time.sleep(1)
+        new_category_list = [new_category_name, 0]
+        category_worksheet.append_row(new_category_list)
+        categories_entered += 1
+        clear_terminal()
+    add_another_category_intro(categories_entered, category_worksheet)
+
+
+def add_another_category_intro(categories_entered, category_worksheet):
+    """
+    Allows user to add more than 5 categories during build new budget
+    """
+    category_count = len(category_worksheet.col_values(1))
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Great! You have added {category_count} categories to your budget!")
+    print_section_border()
+    while True:
+        print("""Would you like to add another budget category?
+1. Yes
+2. No
+""")
+        end_of_transaction_decision = input("Type 1 or 2\n")
+        if validate_y_n_entry(end_of_transaction_decision):
+            break
+    if end_of_transaction_decision == '1':
+        clear_terminal()
+        print(f"{Fore.RESET}----------------------------------\n")
+        print(f"{Style.BRIGHT}Great! Let's keep building your budget")
+        print_section_border()
+
+        print("Your budget so far:")
+        print(" ")
+        get_current_budget(category_worksheet)
+        print(" ")
+
+        print(f"You have entered {category_count} categories so far\n")
+
+        new_category_name = input(f"{Fore.YELLOW}Type the name of a category to add it\n")
+
+        print(" ")
+        print(f"Adding a {new_category_name} category to your category list...\n")
+        time.sleep(1)
+        print(f"Setting {new_category_name}'s starting amount to £0...")
+        time.sleep(1)
+        new_category_list = [new_category_name, 0]
+        category_worksheet.append_row(new_category_list)
+        clear_terminal()
+        add_another_category_intro(category_count, category_worksheet)
+    else:
+        clear_terminal()
+
+
+def add_money_to_new_budget(category_worksheet, transactions_worksheet):
+    """
+    Prompts the user to input their bank balance and then delegate money
+    """
+    print(f"{Fore.RESET}----------------------------------\n")
+    print(f"{Style.BRIGHT}Let's add some money")
+    print_section_border()
+
+    print("Here is your current Budget\n")
+    get_current_budget(category_worksheet)
+
+    print(" ")
+    print(f"{Fore.BLUE}This budget relies on the budgeted amount matching your bank account balance.\n")
+
+    while True:
+        bank_balance = input(f"{Fore.YELLOW}How much is currently in your bank account?\n")
+        if validate_number_entry(bank_balance):
+            break
+    left_to_delegate = float(bank_balance)
+    get_today = date.today()
+    today = get_today.strftime("%d-%m-%y")
+
+    initial_transaction = [left_to_delegate, "Initial Bank Balance", today, "Income"]
+    append_transaction_row(initial_transaction, transactions_worksheet)
+
+    clear_terminal()
+    while left_to_delegate != 0:
+        print_section_border()
+        print(f"{Style.BRIGHT}Time to delegate the money from this balance")
+        print_section_border()
+        print(f"{Fore.BLUE}{Style.BRIGHT}To make sure you don't have any unbudgeted money, you must delegate all this balance.\n")
+        print("Here is how your current budget stands:")
+        print(" ")
+        get_current_budget(category_worksheet)
+        print(" ")
+
+        left_to_delegate = round(float(left_to_delegate), 2)
+        print(f"You have {Fore.GREEN}£{left_to_delegate}{Fore.RESET} left to delegate from your balance.\n")
+        while True:
+            selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to delegate money to:\n")
+            if validate_category_num_entry(selected_category, category_worksheet):
+                break
+        print(" ")
+        category_name = category_worksheet.row_values(int(selected_category))[0]
+        while True:
+            amount_to_delegate = input(f"{Fore.YELLOW}How much would you like to put towards {category_name}?\n")
+            if validate_number_entry(amount_to_delegate):
+                if validate_delegation_max(amount_to_delegate, left_to_delegate):
+                    break
+        rounded_down_amount_to_delegate = round(float(amount_to_delegate), 2)
+        print(" ")
+        print(f"Perfect. Adding {Fore.GREEN}£{rounded_down_amount_to_delegate}{Fore.RESET} to {category_name}...\n")
+        initial_category_amount = category_worksheet.row_values(int(selected_category))[1]
+        new_category_amount = float(initial_category_amount) + rounded_down_amount_to_delegate
+        category_worksheet.update_cell(int(selected_category), 2, new_category_amount)
+        left_to_delegate -= rounded_down_amount_to_delegate
+        time.sleep(2)
+        clear_terminal()
+
+    clear_terminal()
+    print("----------------------------------\n")
+    print("You have delegated all your bank balance! Well done!")
+    print_section_border()
+    time.sleep(2)
+    clear_terminal()
+    print("----------------------------------\n")
+    print("Setting up your dashboard...")
+    print_section_border()
+    time.sleep(2)
+    clear_terminal()
+    home_prompt(category_worksheet, transactions_worksheet)
+
+# Functions for running the budgeting app once user has logged in or created a new budget
+
+
 def home_prompt(category_worksheet, transactions_worksheet):
     """
-    Print the current budget details and 
+    Print the current budget details and
     ask user which action they would like to perform
-    """    
+    """
     print(f"{Fore.RESET}----------------------------------\n")
     print(f"{Style.BRIGHT}Commandline BudgetApp Dashboard")
     print_section_border()
@@ -38,8 +553,7 @@ def home_prompt(category_worksheet, transactions_worksheet):
     get_current_budget(category_worksheet)
     print("")
     print(f"{Fore.YELLOW}What would you like to do?")
-    print(
-    """
+    print("""
     1. Add an Income Transaction
     2. Add a Payment Transaction
     3. Redelegate/Move Money Around
@@ -47,8 +561,7 @@ def home_prompt(category_worksheet, transactions_worksheet):
     5. Add or Delete Categories
     6. My Bank Balance Doesn't Match the Budgeted Amount
     7. Log out
-    """
-    )
+    """)
     while True:
         action = input(f"{Fore.YELLOW}Type the number of the action you would like to perform:\n{Fore.RESET}")
         if validate_home_data(action):
@@ -56,7 +569,6 @@ def home_prompt(category_worksheet, transactions_worksheet):
             print("One second while we get things ready...")
             clear_terminal()
             break
-    
     if int(action) == 1:
         add_paycheck(category_worksheet, transactions_worksheet)
     elif int(action) == 2:
@@ -84,6 +596,7 @@ def home_prompt(category_worksheet, transactions_worksheet):
         time.sleep(2)
         startup_prompt()
 
+
 def get_total_budgeted_amount(category_worksheet):
     """
     Calculates the total budgeted amount from the budget
@@ -91,7 +604,7 @@ def get_total_budgeted_amount(category_worksheet):
     budgeted_amount = category_worksheet.col_values(2)
     column_list = [float(x) for x in budgeted_amount]
 
-    return round(sum(column_list),2) 
+    return round(sum(column_list), 2)
 
 
 def get_current_budget(category_worksheet):
@@ -106,11 +619,11 @@ def get_current_budget(category_worksheet):
     category_num = 1
     space = " "
     dash = "-"
-    for k, v in budget_list.items(): 
+    for k, v in budget_list.items():
         num_1_spacing_amount = 3 - len(str(category_num))
         num_2_spacing_amount = 28 - len(str(k))
-        spacing_1_amount = space*num_1_spacing_amount 
-        spacing_2_amount = dash*num_2_spacing_amount      
+        spacing_1_amount = space*num_1_spacing_amount
+        spacing_2_amount = dash*num_2_spacing_amount
         print(str(category_num) + "." + spacing_1_amount + str(k) + ":" + spacing_2_amount + Fore.GREEN + "£" + str(v))
         category_num += 1
 
@@ -143,8 +656,6 @@ def add_paycheck(category_worksheet, transactions_worksheet):
     append_transaction_row(paycheck_transaction, transactions_worksheet)
 
     clear_terminal()
-    
-    
     while left_to_delegate != 0:
         print_section_border()
         print(f"{Style.BRIGHT}Time to delegate the money from this income!")
@@ -161,7 +672,6 @@ def add_paycheck(category_worksheet, transactions_worksheet):
             selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to delegate money to:\n")
             if validate_category_num_entry(selected_category, category_worksheet):
                 break
-        
         print(" ")
         category_name = category_worksheet.row_values(int(selected_category))[0]
         while True:
@@ -169,15 +679,12 @@ def add_paycheck(category_worksheet, transactions_worksheet):
             if validate_number_entry(amount_to_delegate):
                 if validate_delegation_max(amount_to_delegate, left_to_delegate):
                     break
-        
         rounded_down_amount_to_delegate = round(float(amount_to_delegate), 2)
         print(" ")
         print(f"Perfect. Adding {Fore.GREEN}£{rounded_down_amount_to_delegate}{Fore.RESET} to {category_name}...\n")
-        
         initial_category_amount = category_worksheet.row_values(int(selected_category))[1]
         new_category_amount = float(initial_category_amount) + rounded_down_amount_to_delegate
         category_worksheet.update_cell(int(selected_category), 2, new_category_amount)
-        
         left_to_delegate -= rounded_down_amount_to_delegate
         time.sleep(1.7)
         clear_terminal()
@@ -188,12 +695,10 @@ def add_paycheck(category_worksheet, transactions_worksheet):
     print_section_border()
 
     while True:
-        print(
-"""Would you like to add another income transaction?
+        print("""Would you like to add another income transaction?
 1. Yes
 2. No
-"""
-        )
+""")
         end_of_transaction_decision = input("Type 1 or 2\n")
         if validate_y_n_entry(end_of_transaction_decision):
             break
@@ -219,7 +724,6 @@ def add_transaction(category_worksheet, transactions_worksheet):
         if validate_number_entry(transaction):
             break
     transaction_amount = float(transaction)
-    
     print(" ")
     transaction_institution = input(f"{Fore.YELLOW}Which institution or person received the money?\n")
 
@@ -238,14 +742,12 @@ def add_transaction(category_worksheet, transactions_worksheet):
         transaction_selected_category = input(f"{Fore.YELLOW}Type the number of the category this transaction falls under:\n")
         if validate_category_num_entry(transaction_selected_category, category_worksheet):
             break
-    
     transaction_category_name = category_worksheet.row_values(int(transaction_selected_category))[0]
     print(" ")
     print(f"Deducting {Fore.RED}£{transaction_amount}{Fore.RESET} {transaction_institution} payment from {transaction_category_name}...")
     initial_category_amount = category_worksheet.row_values(int(transaction_selected_category))[1]
     new_category_amount = float(initial_category_amount) - transaction_amount
     category_worksheet.update_cell(int(transaction_selected_category), 2, new_category_amount)
-    
     new_transaction_list = [-transaction_amount, transaction_institution, transaction_date, transaction_category_name]
     append_transaction_row(new_transaction_list, transactions_worksheet)
 
@@ -254,12 +756,10 @@ def add_transaction(category_worksheet, transactions_worksheet):
     print(f"{Style.BRIGHT}Success! Your transaction has been budgeted.")
     print_section_border()
     while True:
-        print(
-"""Would you like to add another transaction?
+        print("""Would you like to add another transaction?
 1. Yes
 2. No
-"""
-        )
+""")
         end_of_transaction_decision = input("Type 1 or 2\n")
         if validate_y_n_entry(end_of_transaction_decision):
             break
@@ -304,8 +804,7 @@ def redelegate(category_worksheet, transactions_worksheet):
     while True:
         transfer_amount_input = input(f"{Fore.YELLOW}How much of {Fore.BLUE}{from_category_name}{Fore.RESET}'s {Fore.GREEN}£{from_category_amount}{Fore.YELLOW} would you like to move to the {Fore.BLUE}{to_category_name}{Fore.YELLOW} category?\n")
         if validate_delegation_max(transfer_amount_input, from_category_amount):
-            break        
-    
+            break
     print(f"{Fore.RESET}")
     print(f"{Fore.RESET}Moving your money...")
 
@@ -316,7 +815,6 @@ def redelegate(category_worksheet, transactions_worksheet):
 
     new_to_category_amount = float(to_category_amount) + float(transfer_amount_input)
     category_worksheet.update_cell(int(to_category_input), 2, new_to_category_amount)
-    
     time.sleep(.7)
     clear_terminal()
 
@@ -349,8 +847,8 @@ def redelegate(category_worksheet, transactions_worksheet):
 
 def update_balance(category_worksheet):
     """
-    Allows the user to input their current bank balance 
-    then prompts them to redelegate or add money so that 
+    Allows the user to input their current bank balance
+    then prompts them to redelegate or add money so that
     the budget matches their bank balance.
     """
     print("----------------------------------\n")
@@ -473,7 +971,7 @@ def add_category(category_worksheet, transactions_worksheet):
         adjust_categories(category_worksheet, transactions_worksheet)
     else:
         clear_terminal()
-        home_prompt(category_worksheet, transactions_worksheet)    
+        home_prompt(category_worksheet, transactions_worksheet)
 
 
 def delete_category(category_worksheet, transactions_worksheet):
@@ -484,7 +982,6 @@ def delete_category(category_worksheet, transactions_worksheet):
     print("----------------------------------\n")
     print(f"{Style.BRIGHT}Not a problem. Let's find the category you want to delete:")
     print_section_border()
-    
     print(f"{Fore.RESET}Here is a list of your current categories:\n")
     get_current_budget(category_worksheet)
     print(" ")
@@ -502,12 +999,9 @@ def delete_category(category_worksheet, transactions_worksheet):
     print(f"Deleting {category_to_delete_name} category...")
     print_section_border()
     category_worksheet.delete_rows(category_to_delete)
-    
-
     category_to_delete_amount = round(float(category_to_delete_amount), 2)
     print(f"{Fore.BLUE}The {category_to_delete_name} category had {Fore.GREEN}£{category_to_delete_amount}{Fore.BLUE} delegated to it.\n")
     print("You will need to delegate this amount to another category.\n")
-    
     while_count = 0
     while category_to_delete_amount != 0:
         if while_count > 0:
@@ -523,7 +1017,6 @@ def delete_category(category_worksheet, transactions_worksheet):
             delegation_category_input = input(f"{Fore.YELLOW}Type the number of the category you wish to delegate money to:\n")
             if validate_category_num_entry(delegation_category_input, category_worksheet):
                 break
-        
         delegation_category = int(delegation_category_input)
         delegation_category_name = category_worksheet.row_values(delegation_category)[0]
         original_delegation_category_amount = float(category_worksheet.row_values(delegation_category)[1])
@@ -693,6 +1186,9 @@ def update_lower_bank_balance(bank_balance, category_worksheet):
     clear_terminal()
 
 
+# Functions for validating inputs
+
+
 def validate_home_data(value):
     """
     Validates the user input from the home page. 
@@ -807,6 +1303,9 @@ def validate_transaction_list_num_entry(value, max):
     return True
 
 
+# Miscellaneous functions
+
+
 def append_transaction_row(value, transactions_worksheet):
     """
     Append a row to the transaction list
@@ -842,546 +1341,6 @@ def txt_effect(text_to_print):
         sys.stdout.write(character)
         sys.stdout.flush()
         time.sleep(0.03)
-
-
-def startup_view():
-    """
-    Plays the startup welcome effect
-    """
-    clear_terminal()
-    txt_effect("----------------------------------\n")
-    print(" ")
-    txt_effect("Welcome to Commandline BudgetApp\n")
-    print(" ")
-    txt_effect("----------------------------------\n")
-    time.sleep(1.7)
-
-def set_up_new_budget(username):
-    """
-    Guides the user through a process to set up a new budget
-    """
-    clear_terminal()
-    print(f"{Fore.RESET}----------------------------------\n")
-    print(f"{Style.BRIGHT}Let's get your new budget set up")
-    print_section_border()
-    print("Here is our preset budget:")
-    print(
-    f"""
-1.  Rent:------------------------{Fore.GREEN}£0{Fore.RESET}
-2.  Utilities:-------------------{Fore.GREEN}£0{Fore.RESET}
-3.  Phone Bill:------------------{Fore.GREEN}£0{Fore.RESET}
-4.  Insurance:-------------------{Fore.GREEN}£0{Fore.RESET}
-5.  Debt:------------------------{Fore.GREEN}£0{Fore.RESET}
-6.  Retirement:------------------{Fore.GREEN}£0{Fore.RESET}
-7.  Groceries:-------------------{Fore.GREEN}£0{Fore.RESET}
-8.  Transportation:--------------{Fore.GREEN}£0{Fore.RESET}
-9.  Entertainment:---------------{Fore.GREEN}£0{Fore.RESET}
-10. Travel:----------------------{Fore.GREEN}£0{Fore.RESET}
-11. Miscellaneous:---------------{Fore.GREEN}£0{Fore.RESET}
-12. Spending Money:--------------{Fore.GREEN}£0{Fore.RESET}
-"""
-        )
-    print(f"{Fore.BLUE}Would you like to use the preset budget or build your own?{Fore.RESET}\n")
-    print("(Both will allow you to further adjust your categories categories after the setup)")
-    print(
-    """
-1. I'll use the preset
-2. I want to build my own
-"""
-        )
-    while True:
-        preset_or_build = input(f"{Fore.YELLOW}Type 1 or 2\n")
-        if validate_y_n_entry(preset_or_build):
-            break
-    
-    SHEET.add_worksheet(username + "_main", 1, 2)
-    SHEET.add_worksheet(username + "_transactions", 1, 4)
-    category_worksheet_name = username + "_"
-    transaction_name = username + "_"
-    category_worksheet = SHEET.worksheet(category_worksheet_name + 'main')
-    transactions_worksheet = SHEET.worksheet(transaction_name + 'transactions')
-    transactions_worksheet.update_acell('A1', 'amount')
-    transactions_worksheet.update_acell('B1', 'insitution')
-    transactions_worksheet.update_acell('C1', 'date')
-    transactions_worksheet.update_acell('D1', 'budget category')
-    
-    if preset_or_build == '1':
-        clear_terminal()
-        print(f"{Fore.RESET}----------------------------------\n")
-        print(f"{Style.BRIGHT}Setting up your budget...")
-        print_section_border()
-        time.sleep(2)
-        clear_terminal()
-
-        set_up_preset_budget(category_worksheet, transactions_worksheet)
-        add_money_to_new_budget(category_worksheet, transactions_worksheet)
-    else:
-        clear_terminal()
-        build_new_budget(category_worksheet, transactions_worksheet)
-        add_money_to_new_budget(category_worksheet, transactions_worksheet)
-
-
-def set_up_preset_budget(category_worksheet, transactions_worksheet):
-    """
-    Fills the budget spreadsheet with preset data
-    """
-    preset_categories = [["Rent", 0], ["Utilities", 0], ["Phone Bill", 0], ["Insurance", 0], ["Debt", 0], ["Retirement", 0], ["Groceries", 0], ["Transportation", 0], ["Entertainment", 0], ["Travel", 0], ["Miscellaneous", 0], ["Spending Money", 0]]
-    category_worksheet.append_rows(preset_categories)
-
-
-def add_money_to_new_budget(category_worksheet, transactions_worksheet):
-    """
-    Prompts the user to input their bank balance and then delegate money
-    """
-    print(f"{Fore.RESET}----------------------------------\n")
-    print(f"{Style.BRIGHT}Let's add some money")
-    print_section_border()
-
-    print("Here is your current Budget\n")
-    get_current_budget(category_worksheet)
-
-    print(" ")
-    print(f"{Fore.BLUE}This budget relies on the budgeted amount matching your bank account balance.\n")
-
-    while True:
-        bank_balance = input(f"{Fore.YELLOW}How much is currently in your bank account?\n")
-        if validate_number_entry(bank_balance):
-            break
-    left_to_delegate = float(bank_balance)
-    get_today = date.today()
-    today = get_today.strftime("%d-%m-%y")
-
-    initial_transaction = [left_to_delegate, "Initial Bank Balance", today, "Income"]
-    append_transaction_row(initial_transaction, transactions_worksheet)
-
-    clear_terminal()
-    
-    
-    while left_to_delegate != 0:
-        print_section_border()
-        print(f"{Style.BRIGHT}Time to delegate the money from this balance")
-        print_section_border()
-        print(f"{Fore.BLUE}{Style.BRIGHT}To make sure you don't have any unbudgeted money, you must delegate all this balance.\n")
-        print("Here is how your current budget stands:")
-        print(" ")
-        get_current_budget(category_worksheet)
-        print(" ")
-
-        left_to_delegate = round(float(left_to_delegate), 2)
-        print(f"You have {Fore.GREEN}£{left_to_delegate}{Fore.RESET} left to delegate from your balance.\n")
-        while True:
-            selected_category = input(f"{Fore.YELLOW}Type the number of the category you wish to delegate money to:\n")
-            if validate_category_num_entry(selected_category, category_worksheet):
-                break
-        
-        print(" ")
-        category_name = category_worksheet.row_values(int(selected_category))[0]
-        while True:
-            amount_to_delegate = input(f"{Fore.YELLOW}How much would you like to put towards {category_name}?\n")
-            if validate_number_entry(amount_to_delegate):
-                if validate_delegation_max(amount_to_delegate, left_to_delegate):
-                    break
-        
-        rounded_down_amount_to_delegate = round(float(amount_to_delegate), 2)
-        print(" ")
-        print(f"Perfect. Adding {Fore.GREEN}£{rounded_down_amount_to_delegate}{Fore.RESET} to {category_name}...\n")
-        
-        initial_category_amount = category_worksheet.row_values(int(selected_category))[1]
-        new_category_amount = float(initial_category_amount) + rounded_down_amount_to_delegate
-        category_worksheet.update_cell(int(selected_category), 2, new_category_amount)
-        
-        left_to_delegate -= rounded_down_amount_to_delegate
-        time.sleep(2)
-        clear_terminal()
-
-    clear_terminal()
-    print("----------------------------------\n")
-    print("You have delegated all your bank balance! Well done!")
-    print_section_border()
-    time.sleep(2)
-    clear_terminal()
-    print("----------------------------------\n")
-    print("Setting up your dashboard...")
-    print_section_border()
-    time.sleep(2)
-    clear_terminal()
-    home_prompt(category_worksheet, transactions_worksheet)
-
-def build_new_budget(category_worksheet, transactions_worksheet):
-    """
-    Allows the user to input their own categories into the cleared budget
-    """
-    categories_entered = 0
-    for i in range(5):
-        print(f"{Fore.RESET}----------------------------------\n")
-        print(f"{Style.BRIGHT}Great! Let's build your budget")
-        print_section_border()
-
-        print(f"{Fore.BLUE}To make things easier later on, you must add at least 5 budget categories right now{Fore.RESET}\n")
-
-        if categories_entered > 0:
-            print("Your budget so far:")
-            print(" ")
-            get_current_budget(category_worksheet)
-            print(" ")
-
-        print(f"You have entered {categories_entered} out of 5 required categories\n")
-
-        new_category_name = input(f"{Fore.YELLOW}Type the name of a category to add it\n")
-
-        print(" ")
-        print(f"Adding a {new_category_name} category to your category list...\n")
-        time.sleep(1)
-        print(f"Setting {new_category_name}'s starting amount to £0...")
-        time.sleep(1)
-        new_category_list = [new_category_name, 0]
-        category_worksheet.append_row(new_category_list)
-        categories_entered += 1
-        clear_terminal()
-    
-    add_another_category_intro(categories_entered, category_worksheet)
-    
-    
-
-
-def add_another_category_intro(categories_entered, category_worksheet):
-    """
-    Allows user to add more than 5 categories during build new budget
-    """
-    category_count = len(category_worksheet.col_values(1))
-    print(f"{Fore.RESET}----------------------------------\n")
-    print(f"{Style.BRIGHT}Great! You have added {category_count} categories to your budget!")
-    print_section_border()
-    while True:
-        print(
-"""Would you like to add another budget category?
-1. Yes
-2. No
-"""
-        )
-        end_of_transaction_decision = input("Type 1 or 2\n")
-        if validate_y_n_entry(end_of_transaction_decision):
-            break
-    
-    if end_of_transaction_decision == '1':
-        clear_terminal()
-        print(f"{Fore.RESET}----------------------------------\n")
-        print(f"{Style.BRIGHT}Great! Let's keep building your budget")
-        print_section_border()
-
-        print("Your budget so far:")
-        print(" ")
-        get_current_budget(category_worksheet)
-        print(" ")
-
-        print(f"You have entered {category_count} categories so far\n")
-
-        new_category_name = input(f"{Fore.YELLOW}Type the name of a category to add it\n")
-
-        print(" ")
-        print(f"Adding a {new_category_name} category to your category list...\n")
-        time.sleep(1)
-        print(f"Setting {new_category_name}'s starting amount to £0...")
-        time.sleep(1)
-        new_category_list = [new_category_name, 0]
-        category_worksheet.append_row(new_category_list)
-        clear_terminal()
-        add_another_category_intro(category_count, category_worksheet)
-    else:
-        clear_terminal()
-    
-
-def create_account():
-    """
-    Allows user to create their own budgeting account
-    """
-    print(f"{Fore.RESET}----------------------------------\n")
-    print(f"{Style.BRIGHT}Let's get your account set up")
-    print_section_border()
-
-    first_name = input(f"{Fore.YELLOW}What is your first name?\n").capitalize()
-    print(" ")
-    
-    emails_list = users_sheet.col_values(2)
-    usernames_list = users_sheet.col_values(3)
-
-    while True:
-        email = input(f"{Fore.YELLOW}Enter your email address:\n")
-        regex_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-        if(re.fullmatch(regex_email, email)):
-            if email in emails_list:
-                print(" ")
-                print("That email already exists")
-                print(
-    """
-Would you like to log in?
-
-1. Yes
-2. No
-"""
-        )
-                while True:
-                    email_fail = input(f"{Fore.YELLOW}Type 1 or 2\n")
-                    print(" ")
-                    if email_fail in ["1"]:
-                        clear_terminal()
-                        log_in()
-                    elif email_fail in ["2"]:
-                        break
-                    else:
-                        print(" ")
-                        print("Please type either 1 or 2")
-            else:
-                break
-        else:
-            print(" ")
-            print("Invalid Email\n")
-    
-    while True:
-        print(" ")
-        new_username = input(f"{Fore.YELLOW}Now enter a username. Make sure it does not have any spaces:\n")
-        if (" " in new_username):
-            print(f"{Fore.RESET}")
-            print("Your username had a space in it. Try again without spaces.")
-        else:
-            if new_username in usernames_list:
-                print(" ")
-                print("That username already exists")
-                print(
-    """
-Would you like to log in?
-
-1. Yes
-2. No, I'll pick a different username
-"""
-        )
-                while True:
-                    email_fail = input(f"{Fore.YELLOW}Type 1 or 2\n")
-                    print(" ")
-                    if email_fail in ["1"]:
-                        clear_terminal()
-                        log_in()
-                    elif email_fail in ["2"]:
-                        break
-                    else:
-                        print(" ")
-                        print("Please type either 1 or 2")
-            else:
-                break
-    
-    while True:
-        print(" ")
-        password_entry_1 = input(f"{Fore.YELLOW}Now enter a password that you will be sure to remember\n")
-        print(" ")
-        password_entry_2 = input(f"{Fore.YELLOW}Retype that password:\n")
-        if password_entry_1 == password_entry_2:
-            break
-        else:
-            print(f"{Fore.RESET}")
-            print("Your passwords do not match. Try again.")
-    
-    new_user_info = [first_name, email, new_username, password_entry_2]
-    users_sheet.append_row(new_user_info)
-
-    clear_terminal()
-    print(f"{Fore.RESET}----------------------------------\n")
-    print(f"{Style.BRIGHT}Setting up your account...")
-    print_section_border()
-    time.sleep(2)
-
-    return new_username
-
-
-def delete_account():
-    """
-    Allows users to delete their account from the database and app
-    """
-    clear_terminal()
-    print(f"{Fore.RESET}----------------------------------\n")
-    print(f"{Style.BRIGHT}Not a problem. Just a few questions and then your account will be deleted.")
-    print_section_border()
-
-    emails_list = users_sheet.col_values(2)
-    usernames_list = users_sheet.col_values(3)
-    usernames_email_list = emails_list + usernames_list
-
-    while True:
-        username = input(f"{Fore.YELLOW}Enter your username or email:\n")
-        if username not in usernames_email_list:
-            print(f"{Fore.RESET}")
-            print("Sorry, there's no account with that username or email")
-            print(" ")
-        else:
-            break
-
-    username_row = users_sheet.find(username).row
-    user_first_name = users_sheet.row_values(username_row)[0]
-
-    while_count = 0
-    while True:
-        print(" ")
-        password = input(f"{Fore.YELLOW}Enter your password:\n")
-
-        if password == users_sheet.row_values(username_row)[3]:
-            break
-        else:
-            print(f"{Fore.RESET} ")
-            print("Sorry, that password is incorrect")    
-
-    category_worksheet_name = username + "_"
-    transaction_name = username + "_"
-    category_worksheet = SHEET.worksheet(category_worksheet_name + 'main')
-    transactions_worksheet = SHEET.worksheet(transaction_name + 'transactions')
-
-    users_sheet.delete_row(username_row)
-    SHEET.del_worksheet(category_worksheet)
-    SHEET.del_worksheet(transactions_worksheet)
-
-    clear_terminal()
-    print(f"{Fore.RESET}----------------------------------\n")
-    print(f"{Style.BRIGHT}Your account has been deleted...")
-    print_section_border()
-    time.sleep(2)
-    startup_prompt()
-
-def log_in():
-    """
-    Allows user to log in
-    """
-    print(f"{Fore.RESET}----------------------------------\n")
-    print(f"{Style.BRIGHT}Log In")
-    print_section_border()
-
-    emails_list = users_sheet.col_values(2)
-    usernames_list = users_sheet.col_values(3)
-    usernames_email_list = emails_list + usernames_list
-
-    while True:
-        username = input(f"{Fore.YELLOW}Enter your username or email:\n")
-        if username not in usernames_email_list:
-            print(" ")
-            print("Sorry, that username doesn't exist.")
-            print(
-"""
-Would you like to create an account?
-
-1. Yes
-2. No, I'll try again
-"""
-    )
-            while True:
-                username_fail = input(f"{Fore.YELLOW}Type 1 or 2\n")
-                if validate_y_n_entry(username_fail):
-                    break
-            if username_fail == '1':
-                clear_terminal()
-                create_account()
-            else:
-                clear_terminal()
-                print(f"{Fore.RESET}----------------------------------\n")
-                print(f"{Style.BRIGHT}Log In")
-                print_section_border()
-        else:
-            break
-
-    username_row = users_sheet.find(username).row
-    user_first_name = users_sheet.row_values(username_row)[0]
-
-    while_count = 0
-    while True:
-        print(" ")
-        password = input(f"{Fore.YELLOW}Enter your password:\n")
-
-        if password == users_sheet.row_values(username_row)[3]:
-            break
-        else:
-            print(f"{Fore.RESET} ")
-            print("Sorry, that password is incorrect")
-            while_count += 1
-            if while_count == 3:
-                clear_terminal()
-                print(f"{Fore.RESET}----------------------------------\n")
-                print(f"{Style.BRIGHT}Log In")
-                print_section_border()
-                print("You have failed to log in 3 times\n")
-                print(
-"""
-Would you like to create an account?
-
-1. Yes
-2. No, I'll try my password again
-"""
-    )
-                while True:
-                    password_fail = input(f"{Fore.YELLOW}Type 1 or 2\n")
-                    if validate_y_n_entry(password_fail):
-                        break
-                if password_fail == '1':
-                    clear_terminal()
-                    create_account()
-                else:
-                    print(" ")
-
-
-    category_worksheet_name = username + "_"
-    transaction_name = username + "_"
-    category_worksheet = SHEET.worksheet(category_worksheet_name + 'main')
-    transactions_worksheet = SHEET.worksheet(transaction_name + 'transactions')
-    time.sleep(1)
-
-    clear_terminal()
-    print(f"{Fore.RESET}----------------------------------\n")
-    print(f"{Style.BRIGHT}Welcome Back, {user_first_name}. Retrieving your Budget...")
-    print_section_border()
-    time.sleep(2)
-    clear_terminal()
-
-    home_prompt(category_worksheet, transactions_worksheet)    
-
-
-def startup_prompt():
-    """
-    Function called at the launch of the program.
-    It plays the startup view, then allows the user to either
-    keep using their old budget or create a new one
-    """
-    startup_view()
-    print(
-    """
-What would you like to do?
-
-1. Log in
-2. Create an account
-3. Delete my account
-4. Quit app
-"""
-        )
-    while True:
-        keep_or_start = input(f"{Fore.YELLOW}Type a number between 1 and 4\n")
-        if validate_4_entry(keep_or_start):
-            break
-    if keep_or_start == '1':
-        clear_terminal()
-        log_in()
-        
-    elif keep_or_start == '2':
-        clear_terminal()
-        get_username = create_account()
-        set_up_new_budget(get_username)
-    elif keep_or_start == '3':
-        delete_account()
-    else:
-        clear_terminal()
-        print(f"{Fore.RESET}----------------------------------\n")
-        print(f"{Style.BRIGHT}Quitting app...")
-        print(" ")
-        print("----------------------------------")
-        time.sleep(2)
-        clear_terminal()
-        print(f"{Fore.RESET}----------------------------------\n")
-        print(f"{Style.BRIGHT}Thanks for using Commandline BudgetApp")
-        print(" ")
-        print("----------------------------------")
 
 
 startup_prompt()
