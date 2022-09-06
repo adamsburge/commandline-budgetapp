@@ -779,12 +779,12 @@ def validate_y_n_entry(value):
         return False
     return True
 
-def validate_3_entry(value):
+def validate_4_entry(value):
     """
-    Validates any inputs with 3 options
+    Validates any inputs with 4 options
     """
     try:
-        if value not in ["1", "2", "3"]:
+        if value not in ["1", "2", "3", "4"]:
             raise ValueError(f"You must enter a number between {Fore.BLUE}1{Fore.RESET} and {Fore.BLUE}3{Fore.RESET}. You entered {Fore.RED}{value}{Fore.RESET}")
     except ValueError as e:
         print(" ")
@@ -1353,11 +1353,12 @@ What would you like to do?
 1. Log in
 2. Create an account
 3. Delete my account
+4. Quit app
 """
         )
     while True:
-        keep_or_start = input(f"{Fore.YELLOW}Type 1 or 2\n")
-        if validate_3_entry(keep_or_start):
+        keep_or_start = input(f"{Fore.YELLOW}Type a number between 1 and 4\n")
+        if validate_4_entry(keep_or_start):
             break
     if keep_or_start == '1':
         clear_terminal()
@@ -1367,8 +1368,20 @@ What would you like to do?
         clear_terminal()
         get_username = create_account()
         set_up_new_budget(get_username)
-    else:
+    elif keep_or_start == '3':
         delete_account()
+    else:
+        clear_terminal()
+        print(f"{Fore.RESET}----------------------------------\n")
+        print(f"{Style.BRIGHT}Quitting app...")
+        print(" ")
+        print("----------------------------------")
+        time.sleep(2)
+        clear_terminal()
+        print(f"{Fore.RESET}----------------------------------\n")
+        print(f"{Style.BRIGHT}Thanks for using Commandline BudgetApp")
+        print(" ")
+        print("----------------------------------")
 
 
 startup_prompt()
