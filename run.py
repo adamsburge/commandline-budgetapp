@@ -950,6 +950,7 @@ def redelegate(category_worksheet, transactions_worksheet):
 
     new_from_category_amount = float(from_category_amount) - \
         float(transfer_amount_input)
+    new_from_category_amount = round(new_from_category_amount, 2)
     category_worksheet.update_cell(
         int(from_category_input), 2, new_from_category_amount)
 
