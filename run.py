@@ -1027,12 +1027,12 @@ def build_new_budget(category_worksheet, transactions_worksheet):
         categories_entered += 1
         clear_terminal()
     
-    add_another_category_intro(categories_entered)
+    add_another_category_intro(categories_entered, category_worksheet)
     
     
 
 
-def add_another_category_intro(categories_entered):
+def add_another_category_intro(categories_entered, category_worksheet):
     """
     Allows user to add more than 5 categories during build new budget
     """
@@ -1074,7 +1074,7 @@ def add_another_category_intro(categories_entered):
         new_category_list = [new_category_name, 0]
         category_worksheet.append_row(new_category_list)
         clear_terminal()
-        add_another_category_intro(category_count)
+        add_another_category_intro(category_count, category_worksheet)
     else:
         clear_terminal()
     
