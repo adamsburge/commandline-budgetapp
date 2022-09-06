@@ -1103,6 +1103,7 @@ def create_account():
     print(" ")
     
     emails_list = users_sheet.col_values(2)
+    usernames_list = users_sheet.col_values(3)
 
     while True:
         email = input(f"{Fore.YELLOW}Enter your email address:\n")
@@ -1143,7 +1144,30 @@ Would you like to log in?
             print(f"{Fore.RESET}")
             print("Your username had a space in it. Try again without spaces.")
         else:
-            break
+            if new_username in usernames_list:
+                print(" ")
+                print("That username already exists")
+                print(
+    """
+Would you like to log in?
+
+1. Yes
+2. No, I'll pick a different username
+"""
+        )
+                while True:
+                    email_fail = input(f"{Fore.YELLOW}Type 1 or 2\n")
+                    print(" ")
+                    if email_fail in ["1"]:
+                        clear_terminal()
+                        log_in()
+                    elif email_fail in ["2"]:
+                        break
+                    else:
+                        print(" ")
+                        print("Please type either 1 or 2")
+            else:
+                break
     
     while True:
         print(" ")
