@@ -14,6 +14,7 @@ Additional features include: allowing the user to create an account which they c
 ![Start Screen](assets/images/start_screen.png)
 
 ### Login
+![Login Page](assets/images/login.png)
 
 ### Create Account
 ![Create Account](assets/images/create_account.png)
@@ -30,6 +31,8 @@ Additional features include: allowing the user to create an account which they c
 ![Home Dashboard](assets/images/home_dashboard.png)
 
 ### Add Income Transaction
+![Income Transaction Page 1](assets/images/income_transaction_1.png)
+![Income Transaction Page 2](assets/images/income_transaction_2.png)
 
 ### Add Payment Transaction
 

@@ -903,7 +903,7 @@ def redelegate(category_worksheet, transactions_worksheet):
                 int(from_category_input))[1]
         if validate_category_num_entry(from_category_input,
                                        category_worksheet):
-            if int(selected_category_amount) <= 0:
+            if float(selected_category_amount) <= 0:
                 print(" ")
                 print("That category has £0. Select another category.\n")
             else:
@@ -938,7 +938,7 @@ def redelegate(category_worksheet, transactions_worksheet):
             f"to the {Fore.BLUE}{to_category_name}{Fore.YELLOW} category?\n")
         if validate_delegation_max(transfer_amount_input,
                                    from_category_amount):
-            if int(transfer_amount_input) <= 0:
+            if float(transfer_amount_input) <= 0:
                 print(" ")
                 print("Please input a number above 0\n")
             else:
@@ -1375,7 +1375,7 @@ def update_lower_bank_balance(bank_balance, category_worksheet):
                 int(selected_category))[1]
             if validate_category_num_entry(selected_category,
                                            category_worksheet):
-                if int(selected_category_amount) <= 0:
+                if float(selected_category_amount) <= 0:
                     print(" ")
                     print("That category has £0. Select another category.\n")
                 else:
