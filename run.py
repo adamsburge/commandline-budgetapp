@@ -188,6 +188,8 @@ def create_account():
 
     while True:
         email = input(f"{Fore.YELLOW}Enter your email address:\n")
+        # The regex expression below was taken from geeksforgeeks.com
+        # See the README for links and more details
         regex_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
         if re.fullmatch(regex_email, email):
             if email in emails_list:
@@ -1419,6 +1421,9 @@ def update_lower_bank_balance(bank_balance, category_worksheet):
 
 
 # Functions for validating inputs
+# Code Institute's Love Sandwiches project provided the base model
+# from with these validation functions were made. They have been
+# altered here to fit the needs of this app
 
 
 def validate_home_data(value):
@@ -1502,6 +1507,8 @@ def validate_date_entry(value):
     """
     Validate that entries requesting dates are formated correctly
     """
+    # The datetime formulas used here are built from information taken from
+    # programiz.com. See README for more information
     try:
         if value != datetime.strptime(value, "%d-%m-%y").strftime('%d-%m-%y'):
             raise ValueError
