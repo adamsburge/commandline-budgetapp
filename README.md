@@ -93,6 +93,16 @@ If the user has forgotten to budget for a while and their current bank account d
 
 Once the user is finished budgeting, they can log out of the app by pressing '7' in the home dashboard. This will log them out and restart the app.
 
+## Features Present Throughout:
+- Money  with a positive balance is presented in green. Money being deducted is red. 
+
+- When the user is prompted to input information, the question is presented in yellow.
+
+- The color blue is used to emphasise important information such as budget category names (when money is being moved) and important information that helps the user understand what they are being prompted to do.
+
+- With one exception, all inputs are paired with validation code to ensure the user enters information that has been formatted correctly and/or does not add payments or make delegations larger than their budget can handle. 
+    - The exception is when the user is prompted to enter a name. This occurs when the user names new budget categories, names institutions which received payments or provided income, as well as when the user enters their first name when creating an account (note, however, that the username is validated to ensure only entries without spaces can be entered).
+
 ## Possible Future Features:
 - Select desired currency
 - Budgeting for couples (multiple users on the same budget account)
