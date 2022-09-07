@@ -2,6 +2,8 @@
 
 ![Am I Responsive Screenshot](assets/images/am_i_responsive.png)
 
+The deployed webapp can be accessed [here](https://commandline-budgetapp.herokuapp.com).
+
 Commandline BudgetApp is a simple bugdeting app which operates in a terminal. The app allows users to create an account, set up a budget and keep track of their money through an easy to use budgeting portal. The impetus for this app was my own frustration with all current budgeting apps either being too complicated (and thus, discouraging to use) or trying to incorporate other aspects of my finances which I would like to control separately (such as investing). Consequently, Commandline BudgetApp focuses solely on keeping track of expenses and helping you delegate money. 
 
 Using the app is simple, as the user simply needs to 1.) make sure that the total budgeted amount is equivalent to that of their bank balance, 2.) log each income and payment transaction, and 3.) follow the app's prompts and questions.
